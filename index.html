@@ -130,7 +130,7 @@
           <label>สถานะคดี<select id="cStatus"><option>รับเรื่องใหม่</option><option>อยู่ระหว่างดำเนินการ</option><option>อยู่ระหว่างพิจารณา</option><option>มีคำพิพากษา</option><option>บังคับคดี</option><option>ปิดคดี</option></select></label>
         </div>
         <div class="divider"></div>
-        <div class="filebox"><label>แนบไฟล์คดี<input type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"></label><div class="hint">PDF, Word และรูปภาพ — เวอร์ชันนี้ยังไม่ได้เชื่อมที่เก็บไฟล์จริง</div></div>
+        <div class="filebox"><label>แนบไฟล์คดี<input id="cFile" type="file" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="if(window.JuslumeCloud)JuslumeCloud.uploadFiles(this)"></label><div class="hint">PDF, Word และรูปภาพ — เมื่อเข้าสู่ Cloud ไฟล์จะถูกเก็บใน Private Storage</div></div>
         <div style="margin-top:16px"><button class="btn primary" onclick="requestSecureAction('เพิ่มข้อมูลคดี',saveCaseRecord)">บันทึกข้อมูลคดี</button></div>
       </div>
     </section>
@@ -251,7 +251,7 @@
           <div class="hint">ค่าเริ่มต้น: ผู้ชำระเป็นนิติบุคคลและเป็นค่าบริการวิชาชีพกฎหมาย ระบบเสนอหัก ณ ที่จ่าย 3%; บุคคลธรรมดาเสนอ 0%. ผู้ใช้ยังเปลี่ยนอัตราได้เมื่อข้อเท็จจริงทางภาษีต่างออกไป</div>
         </div>
         <div class="divider"></div>
-        <div class="filebox"><label>แนบหลักฐานการรับเงิน<input id="rFile" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="showFileNames('rFile','rFiles')"></label><div id="rFiles" class="hint">ยังไม่ได้เลือกไฟล์</div></div>
+        <div class="filebox"><label>แนบหลักฐานการรับเงิน<input id="rFile" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="showFileNames('rFile','rFiles');if(window.JuslumeCloud)JuslumeCloud.uploadFiles(this)"></label><div id="rFiles" class="hint">ยังไม่ได้เลือกไฟล์</div></div>
 
         <div class="preview" id="receiptPreview">
           <div class="dochead">
@@ -349,7 +349,7 @@
           <label>หมายเหตุ<input id="pNote" placeholder="หมายเหตุ"></label>
         </div>
         <div class="divider"></div>
-        <div class="filebox"><label>แนบหลักฐานการจ่ายเงิน<input id="pFile" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="showFileNames('pFile','pFiles')"></label><div id="pFiles" class="hint">ยังไม่ได้เลือกไฟล์</div></div>
+        <div class="filebox"><label>แนบหลักฐานการจ่ายเงิน<input id="pFile" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="showFileNames('pFile','pFiles');if(window.JuslumeCloud)JuslumeCloud.uploadFiles(this)"></label><div id="pFiles" class="hint">ยังไม่ได้เลือกไฟล์</div></div>
 
         <div class="preview">
           <div class="dochead">
