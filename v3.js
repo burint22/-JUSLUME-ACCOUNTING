@@ -6,7 +6,7 @@ var db;
 try{db=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}
 if(!db)db={funds:[],invoices:[],bills:[],journals:[],periods:[],taxSales:[],taxPurchases:[],wht:[],banks:[],audit:[]};
 ['funds','invoices','bills','journals','periods','taxSales','taxPurchases','wht','banks','audit'].forEach(function(k){if(!Array.isArray(db[k]))db[k]=[]});
-function save(){localStorage.setItem(KEY,JSON.stringify(db))}
+function save(){localStorage.setItem(KEY,JSON.stringify(db));window.__JUSLUME_V3_DB__=db;if(window.JuslumeCloud&&typeof window.JuslumeCloud.queuePush==='function')window.JuslumeCloud.queuePush(db)}
 function id(p){return p+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,7)}
 function n(v){return Number(v||0)}
 function money(v){return '฿'+n(v).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})}
@@ -35,7 +35,7 @@ function show(name){
  document.querySelectorAll('aside nav button').forEach(function(x){x.classList.remove('active')});var b=document.querySelector('[data-v3="'+name+'"]');if(b)b.classList.add('active');
  ({funds:renderFunds,ar:renderAR,ap:renderAP,journal:renderJournal,trial:renderTrial,tax:renderTax,periods:renderPeriods,audit:renderAudit,banks:renderBanks,reports:renderReports}[name]||renderFunds)();window.scrollTo(0,0)
 }
-window.showAccountingV3=show;
+window.showAccountingV3=show;window.__JUSLUME_V3_DB__=db;window.getJuslumeV3State=function(){return db};
 function style(){
  var s=document.createElement('style');s.textContent='.v3g{margin:13px 12px 5px;font-size:11px;opacity:.55}.v3stat{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.v3stat .card strong{display:block;font-size:20px;margin-top:6px}.v3table{overflow:auto}.v3table table{min-width:760px}.pill{display:inline-block;padding:4px 8px;border-radius:99px;background:#f1e6e8;font-size:11px}.pill.ok{background:#e8f5ee;color:#176b4b}.pill.warn{background:#fff3cd}.v3form{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.v3wide{grid-column:1/-1}@media(max-width:800px){.v3stat,.v3form{grid-template-columns:1fr 1fr}}@media(max-width:560px){.v3stat,.v3form{grid-template-columns:1fr}}';
  document.head.appendChild(s)
