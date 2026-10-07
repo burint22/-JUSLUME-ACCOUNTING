@@ -469,3 +469,97 @@ $$;
 grant execute on function public.add_office_member_by_email(uuid,text,text) to authenticated;
 grant execute on function public.remove_office_member(uuid,uuid) to authenticated;
 grant execute on function public.list_office_members(uuid) to authenticated;
+
+
+-- Email invitation flow so staff can be granted access before first login.
+create table if not exists office_invitations (
+  id uuid primary key default gen_random_uuid(),
+  office_id uuid not null references law_offices(id) on delete cascade,
+  email text not null,
+  role text not null check (role in ('viewer','editor')),
+  invited_by uuid not null references auth.users(id),
+  accepted_by uuid references auth.users(id),
+  accepted_at timestamptz,
+  created_at timestamptz not null default now(),
+  unique (office_id,email)
+);
+alter table office_invitations enable row level security;
+
+drop policy if exists invitations_owner_read on office_invitations;
+create policy invitations_owner_read on office_invitations for select to authenticated
+using (
+  exists(select 1 from law_offices o where o.id=office_id and o.owner_user_id=auth.uid())
+  or lower(email)=lower(coalesce(auth.jwt()->>'email',''))
+);
+
+drop policy if exists invitations_owner_write on office_invitations;
+create policy invitations_owner_write on office_invitations for all to authenticated
+using (exists(select 1 from law_offices o where o.id=office_id and o.owner_user_id=auth.uid()))
+with check (exists(select 1 from law_offices o where o.id=office_id and o.owner_user_id=auth.uid()));
+
+create or replace function public.invite_office_member(p_office uuid,p_email text,p_role text)
+returns uuid language plpgsql security definer set search_path=public
+as $$
+declare inv uuid;
+begin
+  if not exists(select 1 from law_offices o where o.id=p_office and o.owner_user_id=auth.uid()) then
+    raise exception 'owner permission required';
+  end if;
+  if p_role not in ('viewer','editor') then raise exception 'invalid role'; end if;
+  insert into office_invitations(office_id,email,role,invited_by)
+  values(p_office,lower(trim(p_email)),p_role,auth.uid())
+  on conflict (office_id,email) do update
+    set role=excluded.role, invited_by=excluded.invited_by, accepted_by=null, accepted_at=null
+  returning id into inv;
+  return inv;
+end;
+$$;
+
+create or replace function public.claim_office_invitation()
+returns table(office_id uuid,role text)
+language plpgsql security definer set search_path=public
+as $$
+declare em text;
+begin
+  em:=lower(coalesce(auth.jwt()->>'email',''));
+  if em='' then return; end if;
+  insert into office_members(office_id,user_id,role)
+  select i.office_id,auth.uid(),i.role
+  from office_invitations i
+  where lower(i.email)=em and i.accepted_at is null
+  on conflict (office_id,user_id) do update set role=excluded.role;
+  update office_invitations
+    set accepted_by=auth.uid(),accepted_at=now()
+  where lower(email)=em and accepted_at is null;
+  return query
+  select m.office_id,m.role from office_members m where m.user_id=auth.uid()
+  order by m.created_at asc limit 1;
+end;
+$$;
+
+create or replace function public.list_office_invitations(p_office uuid)
+returns table(id uuid,email text,role text,accepted_at timestamptz)
+language sql stable security definer set search_path=public
+as $$
+  select i.id,i.email,i.role,i.accepted_at
+  from office_invitations i
+  where i.office_id=p_office
+    and exists(select 1 from law_offices o where o.id=p_office and o.owner_user_id=auth.uid())
+  order by i.created_at desc;
+$$;
+
+create or replace function public.revoke_office_invitation(p_office uuid,p_invitation uuid)
+returns void language plpgsql security definer set search_path=public
+as $$
+begin
+  if not exists(select 1 from law_offices o where o.id=p_office and o.owner_user_id=auth.uid()) then
+    raise exception 'owner permission required';
+  end if;
+  delete from office_invitations where id=p_invitation and office_id=p_office and accepted_at is null;
+end;
+$$;
+
+grant execute on function public.invite_office_member(uuid,text,text) to authenticated;
+grant execute on function public.claim_office_invitation() to authenticated;
+grant execute on function public.list_office_invitations(uuid) to authenticated;
+grant execute on function public.revoke_office_invitation(uuid,uuid) to authenticated;
