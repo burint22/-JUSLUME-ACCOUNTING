@@ -108,16 +108,20 @@
           <label>ศาล<input id="cCourt" placeholder="เช่น ศาลจังหวัดนครราชสีมา"></label>
           <label>เลขคดีดำ<input id="cBlack" placeholder="เช่น พ.123/2569"></label>
           <label>เลขคดีแดง<input id="cRed" placeholder="ถ้ายังไม่มีให้เว้นว่าง"></label>
+          <label>คำนำหน้าชื่อโจทก์<select id="cPlaintiffTitle"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อโจทก์<input id="cPlaintiffFirst" placeholder="ชื่อ"></label>
           <label>ชื่อรองโจทก์<input id="cPlaintiffMiddle" placeholder="ชื่อรอง (ถ้ามี)"></label>
           <label>นามสกุลโจทก์<input id="cPlaintiffLast" placeholder="นามสกุล"></label>
           <label>ชื่อนิติบุคคลโจทก์ (ถ้ามี)<input id="cPlaintiffEntity" placeholder="ชื่อบริษัท / ห้างหุ้นส่วน / นิติบุคคล"></label>
+          <label>คำนำหน้าชื่อจำเลย<select id="cDefendantTitle"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อจำเลย<input id="cDefendantFirst" placeholder="ชื่อ"></label>
           <label>ชื่อรองจำเลย<input id="cDefendantMiddle" placeholder="ชื่อรอง (ถ้ามี)"></label>
           <label>นามสกุลจำเลย<input id="cDefendantLast" placeholder="นามสกุล"></label>
           <label>ชื่อนิติบุคคลจำเลย (ถ้ามี)<input id="cDefendantEntity" placeholder="ชื่อบริษัท / ห้างหุ้นส่วน / นิติบุคคล"></label>
-          <label>ฝ่ายที่สำนักงานรับเป็นลูกความ<select id="cSide"><option>โจทก์</option><option>จำเลย</option><option>ผู้ร้อง</option><option>ผู้คัดค้าน</option><option>อื่น ๆ</option></select></label>
+          <label>ฝ่ายที่สำนักงานรับเป็นลูกความ<select id="cSide" onchange="toggleCaseSideOther()"><option>โจทก์</option><option>จำเลย</option><option>ผู้ร้อง</option><option>ผู้คัดค้าน</option><option>อื่น ๆ</option></select></label>
+          <label id="cSideOtherWrap" class="hidden">ระบุฝ่ายลูกความ <span class="req">*</span><input id="cSideOther" placeholder="ต้องระบุเมื่อเลือกอื่น ๆ" oninput="clearFieldError(this)"></label>
           <label>ประเภทคดี<select id="cType"><option>คดีแพ่ง</option><option>คดีอาญา</option><option>คดีแรงงาน</option><option>คดีปกครอง</option><option>คดีล้มละลาย</option><option>บังคับคดี</option><option>อื่น ๆ</option></select></label>
+          <label>คำนำหน้าชื่อทนายผู้รับผิดชอบ<select id="cLawyerTitle"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อทนายผู้รับผิดชอบ<input id="cLawyerFirst" placeholder="ชื่อ"></label>
           <label>ชื่อรองทนายผู้รับผิดชอบ<input id="cLawyerMiddle" placeholder="ชื่อรอง (ถ้ามี)"></label>
           <label>นามสกุลทนายผู้รับผิดชอบ<input id="cLawyerLast" placeholder="นามสกุล"></label>
@@ -156,10 +160,12 @@
           <label>ศาล<input id="rCourt" placeholder="ชื่อศาล" oninput="syncReceipt()"></label>
           <label>เลขคดีดำ<input id="rBlack" placeholder="พ.123/2569" oninput="syncReceipt()"></label>
           <label>เลขคดีแดง<input id="rRed" placeholder="ถ้ามี" oninput="syncReceipt()"></label>
+          <label>คำนำหน้าชื่อโจทก์<select id="rPlaintiffTitle" onchange="syncReceipt()"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อโจทก์<input id="rPlaintiffFirst" placeholder="ชื่อ" oninput="syncReceipt()"></label>
           <label>ชื่อรองโจทก์<input id="rPlaintiffMiddle" placeholder="ชื่อรอง (ถ้ามี)" oninput="syncReceipt()"></label>
           <label>นามสกุลโจทก์<input id="rPlaintiffLast" placeholder="นามสกุล" oninput="syncReceipt()"></label>
           <label>ชื่อนิติบุคคลโจทก์ (ถ้ามี)<input id="rPlaintiffEntity" placeholder="ชื่อบริษัท / ห้างหุ้นส่วน / นิติบุคคล" oninput="syncReceipt()"></label>
+          <label>คำนำหน้าชื่อจำเลย<select id="rDefendantTitle" onchange="syncReceipt()"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อจำเลย<input id="rDefendantFirst" placeholder="ชื่อ" oninput="syncReceipt()"></label>
           <label>ชื่อรองจำเลย<input id="rDefendantMiddle" placeholder="ชื่อรอง (ถ้ามี)" oninput="syncReceipt()"></label>
           <label>นามสกุลจำเลย<input id="rDefendantLast" placeholder="นามสกุล" oninput="syncReceipt()"></label>
@@ -176,7 +182,7 @@
             </select>
           </label>
           <label id="rCompanyWrap" class="hidden">ชื่อนิติบุคคล / บริษัท <span class="req">*</span><input id="rCompanyName" placeholder="ชื่อบริษัท / ห้างหุ้นส่วน / นิติบุคคล" oninput="syncReceipt()"></label>
-          <label>คำนำหน้าชื่อ<input id="rTitle" placeholder="นาย / นาง / นางสาว / อื่น ๆ" oninput="syncReceipt()"></label>
+          <label>คำนำหน้าชื่อ<select id="rTitle" onchange="syncReceipt()"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อ<input id="rFirstName" placeholder="ชื่อ" oninput="syncReceipt()"></label>
           <label>ชื่อรอง<input id="rMiddleName" placeholder="ชื่อรอง (ถ้ามี)" oninput="syncReceipt()"></label>
           <label>นามสกุล<input id="rLastName" placeholder="นามสกุล" oninput="syncReceipt()"></label>
@@ -220,9 +226,11 @@
             </select>
           </label>
           <label>บัญชีที่รับเงิน<input id="rBank" placeholder="ธนาคาร / เลขบัญชี / ชื่อบัญชี" oninput="syncReceipt()"></label>
+          <label>คำนำหน้าชื่อผู้จ่ายเงิน<select id="rPayerSignerTitle" onchange="syncReceipt()"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อผู้จ่ายเงิน<input id="rPayerSignerFirst" placeholder="ชื่อ" oninput="syncReceipt()"></label>
           <label>ชื่อรองผู้จ่ายเงิน<input id="rPayerSignerMiddle" placeholder="ชื่อรอง (ถ้ามี)" oninput="syncReceipt()"></label>
           <label>นามสกุลผู้จ่ายเงิน<input id="rPayerSignerLast" placeholder="นามสกุล" oninput="syncReceipt()"></label>
+          <label>คำนำหน้าชื่อผู้รับเงิน<select id="rReceiverTitle" onchange="syncReceipt()"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อผู้รับเงิน<input id="rReceiverFirst" placeholder="ชื่อ" oninput="syncReceipt()"></label>
           <label>ชื่อรองผู้รับเงิน<input id="rReceiverMiddle" placeholder="ชื่อรอง (ถ้ามี)" oninput="syncReceipt()"></label>
           <label>นามสกุลผู้รับเงิน<input id="rReceiverLast" placeholder="นามสกุล" oninput="syncReceipt()"></label>
@@ -273,10 +281,12 @@
           <label>ศาล<input id="pCourt" placeholder="ชื่อศาล" oninput="syncPayment()"></label>
           <label>เลขคดีดำ<input id="pBlack" placeholder="พ.123/2569" oninput="syncPayment()"></label>
           <label>เลขคดีแดง<input id="pRed" placeholder="ถ้ามี" oninput="syncPayment()"></label>
+          <label>คำนำหน้าชื่อโจทก์<select id="pPlaintiffTitle"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อโจทก์<input id="pPlaintiffFirst" placeholder="ชื่อ"></label>
           <label>ชื่อรองโจทก์<input id="pPlaintiffMiddle" placeholder="ชื่อรอง (ถ้ามี)"></label>
           <label>นามสกุลโจทก์<input id="pPlaintiffLast" placeholder="นามสกุล"></label>
           <label>ชื่อนิติบุคคลโจทก์ (ถ้ามี)<input id="pPlaintiffEntity" placeholder="ชื่อบริษัท / ห้างหุ้นส่วน / นิติบุคคล"></label>
+          <label>คำนำหน้าชื่อจำเลย<select id="pDefendantTitle"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อจำเลย<input id="pDefendantFirst" placeholder="ชื่อ"></label>
           <label>ชื่อรองจำเลย<input id="pDefendantMiddle" placeholder="ชื่อรอง (ถ้ามี)"></label>
           <label>นามสกุลจำเลย<input id="pDefendantLast" placeholder="นามสกุล"></label>
@@ -286,6 +296,7 @@
         <div class="divider"></div>
         <div class="form-title">ผู้จ่ายเงิน</div>
         <div class="formgrid three">
+          <label>คำนำหน้าชื่อผู้จ่ายเงิน<select id="pPayeeTitle" onchange="syncPayment()"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อผู้จ่ายเงิน<input id="pPayeeFirst" placeholder="ชื่อ" oninput="syncPayment()"></label>
           <label>ชื่อรองผู้จ่ายเงิน<input id="pPayeeMiddle" placeholder="ชื่อรอง (ถ้ามี)" oninput="syncPayment()"></label>
           <label>นามสกุลผู้จ่ายเงิน<input id="pPayeeLast" placeholder="นามสกุล" oninput="syncPayment()"></label>
@@ -315,12 +326,15 @@
           <label>จำนวนเงิน (บาท)<input id="pAmount" type="number" min="0" step="0.01" placeholder="0.00" oninput="syncPayment()"></label>
           <label>อัตราภาษีหัก ณ ที่จ่าย<select id="pWhtRate" onchange="syncPayment()"><option value="0">0%</option><option value="1">1%</option><option value="3" selected>3%</option><option value="5">5%</option></select></label>
           <label>ยอดจ่ายสุทธิ<input id="pNetView" readonly value="0.00"></label>
+          <label>คำนำหน้าชื่อผู้อนุมัติ<select id="pApproverTitle"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อผู้อนุมัติ<input id="pApproverFirst" placeholder="ชื่อ"></label>
           <label>ชื่อรองผู้อนุมัติ<input id="pApproverMiddle" placeholder="ชื่อรอง (ถ้ามี)"></label>
           <label>นามสกุลผู้อนุมัติ<input id="pApproverLast" placeholder="นามสกุล"></label>
+          <label>คำนำหน้าชื่อผู้จ่ายเงิน (ลงชื่อ)<select id="pPayerOfficerTitle"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อผู้จ่ายเงิน (ลงชื่อ)<input id="pPayerOfficerFirst" placeholder="ชื่อ"></label>
           <label>ชื่อรองผู้จ่ายเงิน (ลงชื่อ)<input id="pPayerOfficerMiddle" placeholder="ชื่อรอง (ถ้ามี)"></label>
           <label>นามสกุลผู้จ่ายเงิน (ลงชื่อ)<input id="pPayerOfficerLast" placeholder="นามสกุล"></label>
+          <label>คำนำหน้าชื่อผู้รับเงิน<select id="pPayeeSignerTitle" onchange="syncPayment()"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อผู้รับเงิน<input id="pPayeeSignerFirst" placeholder="ชื่อ" oninput="syncPayment()"></label>
           <label>ชื่อรองผู้รับเงิน<input id="pPayeeSignerMiddle" placeholder="ชื่อรอง (ถ้ามี)" oninput="syncPayment()"></label>
           <label>นามสกุลผู้รับเงิน<input id="pPayeeSignerLast" placeholder="นามสกุล" oninput="syncPayment()"></label>
@@ -380,6 +394,7 @@
         <div class="divider"></div>
         <div class="form-title">ข้อมูลบนเอกสาร</div>
         <div class="formgrid three">
+          <label>คำนำหน้าชื่อผู้มีอำนาจ / เจ้าของสำนักงาน<select id="oOwnerTitle"><option value="">ไม่ระบุ</option><option>นาย</option><option>นาง</option><option>นางสาว</option><option>ดร.</option><option>ศ.</option><option>รศ.</option><option>ผศ.</option></select></label>
           <label>ชื่อผู้มีอำนาจ / เจ้าของสำนักงาน<input id="oOwnerFirst" placeholder="ชื่อ"></label>
           <label>ชื่อรองผู้มีอำนาจ / เจ้าของสำนักงาน<input id="oOwnerMiddle" placeholder="ชื่อรอง (ถ้ามี)"></label>
           <label>นามสกุลผู้มีอำนาจ / เจ้าของสำนักงาน<input id="oOwnerLast" placeholder="นามสกุล"></label>
@@ -440,14 +455,20 @@
     if(val('rPayerType')==='company') return val('rCompanyName');
     return [val('rTitle'),val('rFirstName'),val('rMiddleName'),val('rLastName')].filter(Boolean).join(' ');
   }
-  function personName(firstId,middleId,lastId){
-    return [val(firstId),val(middleId),val(lastId)].filter(function(x){return String(x||'').trim()}).join(' ');
+  function personName(firstId,middleId,lastId,titleId){
+    return [titleId?val(titleId):'',val(firstId),val(middleId),val(lastId)].filter(function(x){return String(x||'').trim()}).join(' ');
   }
-  function partyName(entityId,firstId,middleId,lastId){
-    return val(entityId).trim() || personName(firstId,middleId,lastId);
+  function partyName(entityId,firstId,middleId,lastId,titleId){
+    return val(entityId).trim() || personName(firstId,middleId,lastId,titleId);
   }
   function paymentPayerName(){
-    return partyName('pPayeeEntity','pPayeeFirst','pPayeeMiddle','pPayeeLast');
+    return partyName('pPayeeEntity','pPayeeFirst','pPayeeMiddle','pPayeeLast','pPayeeTitle');
+  }
+  function toggleCaseSideOther(){
+    var other=val('cSide')==='อื่น ๆ';
+    var wrap=document.getElementById('cSideOtherWrap');
+    if(wrap)wrap.classList.toggle('hidden',!other);
+    if(!other){var input=document.getElementById('cSideOther');if(input){input.value='';clearFieldError(input)}}
   }
   function togglePayerType(){
     var company=val('rPayerType')==='company';
@@ -505,10 +526,10 @@
     syncReceipt()
   }
 
-  var office={name:'JUSLUME LAW OFFICE',entity:'บุคคลธรรมดา',branch:'สำนักงานใหญ่',regId:'',taxId:'',phone:'',email:'',ownerEmail:'',address:'',branchNo:'',vat:false,owner:'',ownerFirst:'',ownerMiddle:'',ownerLast:'',position:'',footer:'',logo:'',supabaseUrl:'',supabaseAnon:''};
+  var office={name:'JUSLUME LAW OFFICE',entity:'บุคคลธรรมดา',branch:'สำนักงานใหญ่',regId:'',taxId:'',phone:'',email:'',ownerEmail:'',address:'',branchNo:'',vat:false,owner:'',ownerTitle:'',ownerFirst:'',ownerMiddle:'',ownerLast:'',position:'',footer:'',logo:'',supabaseUrl:'',supabaseAnon:''};
   function loadOffice(){
     try{var saved=localStorage.getItem('juslumeOfficeProfile');if(saved)office=Object.assign(office,JSON.parse(saved))}catch(e){}
-    var map={oName:'name',oEntity:'entity',oBranch:'branch',oRegId:'regId',oTaxId:'taxId',oPhone:'phone',oEmail:'email',oOwnerEmail:'ownerEmail',oAddress:'address',oBranchNo:'branchNo',oOwnerFirst:'ownerFirst',oOwnerMiddle:'ownerMiddle',oOwnerLast:'ownerLast',oPosition:'position',oFooter:'footer',oSupabaseUrl:'supabaseUrl',oSupabaseAnon:'supabaseAnon'};
+    var map={oName:'name',oEntity:'entity',oBranch:'branch',oRegId:'regId',oTaxId:'taxId',oPhone:'phone',oEmail:'email',oOwnerEmail:'ownerEmail',oAddress:'address',oBranchNo:'branchNo',oOwnerTitle:'ownerTitle',oOwnerFirst:'ownerFirst',oOwnerMiddle:'ownerMiddle',oOwnerLast:'ownerLast',oPosition:'position',oFooter:'footer',oSupabaseUrl:'supabaseUrl',oSupabaseAnon:'supabaseAnon'};
     Object.keys(map).forEach(function(id){var e=document.getElementById(id);if(e)e.value=office[map[id]]||''});
     document.getElementById('oVat').checked=!!office.vat;
     applyOffice();
@@ -516,7 +537,7 @@
   function saveOffice(){
     if(!val('oAddress').trim()){document.getElementById('oAddress').focus();alert('กรุณาระบุที่อยู่บริษัท / สำนักงานทนายความ');return}
     if(!val('oOwnerEmail').trim()){document.getElementById('oOwnerEmail').focus();alert('กรุณาระบุอีเมลเจ้าของสำนักงานสำหรับรับรหัสยืนยัน');return}
-    office.name=val('oName')||'ชื่อสำนักงาน';office.entity=val('oEntity');office.branch=val('oBranch');office.regId=val('oRegId');office.taxId=val('oTaxId');office.phone=val('oPhone');office.email=val('oEmail');office.ownerEmail=val('oOwnerEmail');office.address=val('oAddress');office.branchNo=val('oBranchNo');office.ownerFirst=val('oOwnerFirst');office.ownerMiddle=val('oOwnerMiddle');office.ownerLast=val('oOwnerLast');office.owner=personName('oOwnerFirst','oOwnerMiddle','oOwnerLast');office.position=val('oPosition');office.footer=val('oFooter');office.supabaseUrl=val('oSupabaseUrl');office.supabaseAnon=val('oSupabaseAnon');office.vat=document.getElementById('oVat').checked;
+    office.name=val('oName')||'ชื่อสำนักงาน';office.entity=val('oEntity');office.branch=val('oBranch');office.regId=val('oRegId');office.taxId=val('oTaxId');office.phone=val('oPhone');office.email=val('oEmail');office.ownerEmail=val('oOwnerEmail');office.address=val('oAddress');office.branchNo=val('oBranchNo');office.ownerTitle=val('oOwnerTitle');office.ownerFirst=val('oOwnerFirst');office.ownerMiddle=val('oOwnerMiddle');office.ownerLast=val('oOwnerLast');office.owner=personName('oOwnerFirst','oOwnerMiddle','oOwnerLast','oOwnerTitle');office.position=val('oPosition');office.footer=val('oFooter');office.supabaseUrl=val('oSupabaseUrl');office.supabaseAnon=val('oSupabaseAnon');office.vat=document.getElementById('oVat').checked;
     localStorage.setItem('juslumeOfficeProfile',JSON.stringify(office));applyOffice();alert('บันทึกข้อมูลสำนักงานแล้ว')
   }
   function loadLogo(ev){
@@ -536,7 +557,7 @@
     setText('rPreviewType',val('rDocType'));setText('rPreviewNo','เลขที่ '+(val('rNo')||'—'));var d=val('rDate');setText('rPreviewDate',d?d.split('-').reverse().join('/'):'—');
     setText('rpPayer',payerFullName());setText('rpPayerId',val('rPayerId'));setText('rpPayerAddress',val('rPayerAddress'));setText('rpMethod',val('rMethod'));
     setText('rpCase',(val('rCourt')||'—')+' / ดำ '+(val('rBlack')||'—')+(val('rRed')?' / แดง '+val('rRed'):''));
-    setText('rpParties','โจทก์ '+(partyName('rPlaintiffEntity','rPlaintiffFirst','rPlaintiffMiddle','rPlaintiffLast')||'—')+' / จำเลย '+(partyName('rDefendantEntity','rDefendantFirst','rDefendantMiddle','rDefendantLast')||'—'));setText('rpSide',val('rSide'));
+    setText('rpParties','โจทก์ '+(partyName('rPlaintiffEntity','rPlaintiffFirst','rPlaintiffMiddle','rPlaintiffLast','rPlaintiffTitle')||'—')+' / จำเลย '+(partyName('rDefendantEntity','rDefendantFirst','rDefendantMiddle','rDefendantLast','rDefendantTitle')||'—'));setText('rpSide',val('rSide'));
     var items=checkedValues('receiptChecks');if(items.indexOf('อื่น ๆ')>-1&&val('rOther'))items=items.map(function(x){return x==='อื่น ๆ'?val('rOther'):x});setText('rpItems',items.join(', '));
     var sub=Number(val('rSubtotal')||0),base=sub,vat=0,vatMode=val('rVatMode');
     if(vatMode==='auto')vatMode=office.vat?'add':'none';
@@ -562,7 +583,7 @@
     if(isR){var sub=Number(val('rSubtotal')||0),base=sub,vat=0,mode=val('rVatMode');if(mode==='auto')mode=office.vat?'add':'none';if(mode==='add')vat=sub*.07;else if(mode==='included'){base=sub/1.07;vat=sub-base}var wr=val('rWhtMode')==='auto'?(val('rPayerType')==='company'?3:0):Number(val('rWhtMode')||0),wht=base*wr/100,gross=mode==='add'?sub+vat:sub,net=gross-wht;rows='<tr><td>มูลค่าก่อน VAT</td><td>'+money(base)+'</td></tr><tr><td>VAT 7%</td><td>'+money(vat)+'</td></tr><tr><td>หัก ณ ที่จ่าย '+wr+'%</td><td>'+money(wht)+'</td></tr><tr class="total"><td>รับสุทธิ</td><td>'+money(net)+'</td></tr>'}
     else{var amt=Number(val('pAmount')||0),pr=Number(val('pWhtRate')||0),pw=amt*pr/100;rows='<tr><td>ยอดค่าใช้จ่าย</td><td>'+money(amt)+'</td></tr><tr><td>หัก ณ ที่จ่าย '+pr+'%</td><td>'+money(pw)+'</td></tr><tr class="total"><td>จ่ายสุทธิ</td><td>'+money(amt-pw)+'</td></tr>'}
     var logo=office.logo?'<img src="'+office.logo+'" style="max-width:75px;max-height:75px">':'';
-    var html='<!doctype html><html lang="th"><head><meta charset="utf-8"><title>'+esc(title)+' '+esc(no)+'</title><style>body{font-family:Arial,"Noto Sans Thai",sans-serif;color:#222;padding:36px;max-width:850px;margin:auto}.head{display:flex;justify-content:space-between;gap:24px}.issuer{display:flex;gap:14px}.issuer h2{margin:0 0 5px}.muted{color:#666;font-size:12px;line-height:1.6}.doctype{text-align:right}.doctype h1{font-size:22px;margin:0;color:#58101f}.box{border:1px solid #ddd;border-radius:8px;padding:14px;margin-top:18px}.row{display:grid;grid-template-columns:150px 1fr;padding:7px 0;border-bottom:1px solid #eee}.row:last-child{border:0}.label{color:#666}table{width:380px;margin:18px 0 0 auto;border-collapse:collapse}td{padding:7px;border-bottom:1px solid #ddd}.total td{font-weight:bold;font-size:17px}.sign{display:flex;justify-content:space-between;margin-top:65px}.sign>div{width:220px;text-align:center;border-top:1px solid #555;padding-top:7px}@media print{body{padding:12mm}}</style></head><body><div class="head"><div class="issuer">'+logo+'<div><h2>'+esc(office.name||'ชื่อสำนักงาน')+'</h2><div class="muted">'+esc(office.address)+'<br>โทร '+esc(office.phone)+' | เลขผู้เสียภาษี '+esc(office.taxId||office.regId)+(office.branch?' | '+esc(office.branch):'')+'</div></div></div><div class="doctype"><h1>'+esc(title)+'</h1><div>เลขที่ '+esc(no)+'</div><div>วันที่ '+esc(date?date.split('-').reverse().join('/'):'-')+'</div></div></div><div class="box"><div class="row"><div class="label">'+(isR?'ผู้ชำระ / ผู้รับบริการ':'ผู้รับเงิน')+'</div><div>'+esc(party)+'</div></div><div class="row"><div class="label">เลขประจำตัว</div><div>'+esc(partyId)+'</div></div><div class="row"><div class="label">ที่อยู่</div><div>'+esc(address)+'</div></div><div class="row"><div class="label">ศาล / คดี</div><div>'+esc(court)+' | ดำ '+esc(black)+(red?' | แดง '+esc(red):'')+'</div></div><div class="row"><div class="label">รายการ</div><div>'+esc(items.join(', '))+'</div></div><div class="row"><div class="label">วิธี'+(isR?'รับ':'จ่าย')+'</div><div>'+esc(method)+'</div></div></div><table>'+rows+'</table><div class="sign"><div>'+esc(isR?(personName('rPayerSignerFirst','rPayerSignerMiddle','rPayerSignerLast')||party):(personName('pPayerOfficerFirst','pPayerOfficerMiddle','pPayerOfficerLast')||office.owner||'ผู้จ่ายเงิน'))+'<br>ผู้จ่ายเงิน</div><div>'+esc(isR?(personName('rReceiverFirst','rReceiverMiddle','rReceiverLast')||office.owner||'ผู้รับเงิน'):(personName('pPayeeSignerFirst','pPayeeSignerMiddle','pPayeeSignerLast')||party||'ผู้รับเงิน'))+'<br>ผู้รับเงิน</div></div><script>window.onload=function(){window.print()}<\/script></body></html>';
+    var html='<!doctype html><html lang="th"><head><meta charset="utf-8"><title>'+esc(title)+' '+esc(no)+'</title><style>body{font-family:Arial,"Noto Sans Thai",sans-serif;color:#222;padding:36px;max-width:850px;margin:auto}.head{display:flex;justify-content:space-between;gap:24px}.issuer{display:flex;gap:14px}.issuer h2{margin:0 0 5px}.muted{color:#666;font-size:12px;line-height:1.6}.doctype{text-align:right}.doctype h1{font-size:22px;margin:0;color:#58101f}.box{border:1px solid #ddd;border-radius:8px;padding:14px;margin-top:18px}.row{display:grid;grid-template-columns:150px 1fr;padding:7px 0;border-bottom:1px solid #eee}.row:last-child{border:0}.label{color:#666}table{width:380px;margin:18px 0 0 auto;border-collapse:collapse}td{padding:7px;border-bottom:1px solid #ddd}.total td{font-weight:bold;font-size:17px}.sign{display:flex;justify-content:space-between;margin-top:65px}.sign>div{width:220px;text-align:center;border-top:1px solid #555;padding-top:7px}@media print{body{padding:12mm}}</style></head><body><div class="head"><div class="issuer">'+logo+'<div><h2>'+esc(office.name||'ชื่อสำนักงาน')+'</h2><div class="muted">'+esc(office.address)+'<br>โทร '+esc(office.phone)+' | เลขผู้เสียภาษี '+esc(office.taxId||office.regId)+(office.branch?' | '+esc(office.branch):'')+'</div></div></div><div class="doctype"><h1>'+esc(title)+'</h1><div>เลขที่ '+esc(no)+'</div><div>วันที่ '+esc(date?date.split('-').reverse().join('/'):'-')+'</div></div></div><div class="box"><div class="row"><div class="label">'+(isR?'ผู้ชำระ / ผู้รับบริการ':'ผู้รับเงิน')+'</div><div>'+esc(party)+'</div></div><div class="row"><div class="label">เลขประจำตัว</div><div>'+esc(partyId)+'</div></div><div class="row"><div class="label">ที่อยู่</div><div>'+esc(address)+'</div></div><div class="row"><div class="label">ศาล / คดี</div><div>'+esc(court)+' | ดำ '+esc(black)+(red?' | แดง '+esc(red):'')+'</div></div><div class="row"><div class="label">รายการ</div><div>'+esc(items.join(', '))+'</div></div><div class="row"><div class="label">วิธี'+(isR?'รับ':'จ่าย')+'</div><div>'+esc(method)+'</div></div></div><table>'+rows+'</table><div class="sign"><div>'+esc(isR?(personName('rPayerSignerFirst','rPayerSignerMiddle','rPayerSignerLast','rPayerSignerTitle')||party):(personName('pPayerOfficerFirst','pPayerOfficerMiddle','pPayerOfficerLast','pPayerOfficerTitle')||office.owner||'ผู้จ่ายเงิน'))+'<br>ผู้จ่ายเงิน</div><div>'+esc(isR?(personName('rReceiverFirst','rReceiverMiddle','rReceiverLast','rReceiverTitle')||office.owner||'ผู้รับเงิน'):(personName('pPayeeSignerFirst','pPayeeSignerMiddle','pPayeeSignerLast','pPayeeSignerTitle')||party||'ผู้รับเงิน'))+'<br>ผู้รับเงิน</div></div><script>window.onload=function(){window.print()}<\/script></body></html>';
     var w=window.open('','_blank','width=900,height=950');w.document.write(html);w.document.close()
   }
 
@@ -614,12 +635,21 @@
   }
   function saveCaseRecord(){
     var court=val('cCourt'),black=val('cBlack'),red=val('cRed'),
-        plaintiff=partyName('cPlaintiffEntity','cPlaintiffFirst','cPlaintiffMiddle','cPlaintiffLast'),
-        defendant=partyName('cDefendantEntity','cDefendantFirst','cDefendantMiddle','cDefendantLast'),
-        lawyer=personName('cLawyerFirst','cLawyerMiddle','cLawyerLast');
+        plaintiff=partyName('cPlaintiffEntity','cPlaintiffFirst','cPlaintiffMiddle','cPlaintiffLast','cPlaintiffTitle'),
+        defendant=partyName('cDefendantEntity','cDefendantFirst','cDefendantMiddle','cDefendantLast','cDefendantTitle'),
+        lawyer=personName('cLawyerFirst','cLawyerMiddle','cLawyerLast','cLawyerTitle');
     if(!court.trim()){document.getElementById('cCourt').focus();alert('กรุณาระบุศาล');return}
     if(!black.trim()&&!red.trim()){document.getElementById('cBlack').focus();alert('กรุณาระบุเลขคดีดำหรือเลขคดีแดง');return}
-    appData.cases.unshift({id:'c_'+Date.now(),court:court,black:black||'—',red:red||'—',plaintiff:plaintiff||'—',defendant:defendant||'—',lawyer:lawyer||'—',side:val('cSide'),status:val('cStatus')});
+    var side=val('cSide');
+    if(side==='อื่น ๆ'){
+      if(!val('cSideOther').trim()){
+        var sideInput=document.getElementById('cSideOther');sideInput.classList.add('error');sideInput.focus();
+        alert('เมื่อเลือกฝ่ายลูกความเป็น “อื่น ๆ” ต้องระบุว่าเป็นฝ่ายใดก่อนบันทึก');
+        return
+      }
+      side=val('cSideOther').trim();
+    }
+    appData.cases.unshift({id:'c_'+Date.now(),court:court,black:black||'—',red:red||'—',plaintiff:plaintiff||'—',defendant:defendant||'—',lawyer:lawyer||'—',side:side,status:val('cStatus')});
     saveAppData();renderData();alert('เพิ่มข้อมูลคดีแล้ว');showPage('cases')
   }
 
@@ -678,7 +708,7 @@
     })
   }
 
-  loadOffice();loadAppData();renderData();togglePayerType();syncReceipt();syncPayment();
+  loadOffice();loadAppData();renderData();toggleCaseSideOther();togglePayerType();syncReceipt();syncPayment();
 </script>
 </body>
 </html>
