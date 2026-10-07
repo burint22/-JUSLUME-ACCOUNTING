@@ -239,8 +239,52 @@ create table if not exists audit_log (
   created_at timestamptz not null default now()
 );
 
+
+create table if not exists office_members (
+  office_id uuid not null references law_offices(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  role text not null default 'viewer' check (role in ('viewer','editor','owner')),
+  created_at timestamptz not null default now(),
+  primary key (office_id,user_id)
+);
+
+-- Cloud snapshot keeps the current front-end model transactionally persistent while
+-- normalized accounting tables remain available for reporting/integration.
+create table if not exists app_state (
+  office_id uuid primary key references law_offices(id) on delete cascade,
+  state jsonb not null default '{}'::jsonb,
+  updated_by uuid references auth.users(id),
+  updated_at timestamptz not null default now()
+);
+
+create or replace function public.can_access_office(p_office uuid)
+returns boolean language sql stable security definer set search_path=public
+as $$
+  select exists(
+    select 1 from law_offices o
+    where o.id=p_office and o.owner_user_id=auth.uid()
+  ) or exists(
+    select 1 from office_members m
+    where m.office_id=p_office and m.user_id=auth.uid()
+  );
+$$;
+
+create or replace function public.can_edit_office(p_office uuid)
+returns boolean language sql stable security definer set search_path=public
+as $$
+  select exists(
+    select 1 from law_offices o
+    where o.id=p_office and o.owner_user_id=auth.uid()
+  ) or exists(
+    select 1 from office_members m
+    where m.office_id=p_office and m.user_id=auth.uid() and m.role in ('owner','editor')
+  );
+$$;
+
 alter table profiles enable row level security;
 alter table law_offices enable row level security;
+alter table office_members enable row level security;
+alter table app_state enable row level security;
 alter table cases enable row level security;
 alter table case_funds enable row level security;
 alter table invoices enable row level security;
@@ -257,18 +301,108 @@ alter table accounting_periods enable row level security;
 alter table documents enable row level security;
 alter table audit_log enable row level security;
 
--- Basic authenticated-user policies for prototype deployment.
--- For production, replace these with office-membership policies.
+drop policy if exists profiles_self on profiles;
+create policy profiles_self on profiles for all to authenticated
+using (id=auth.uid()) with check (id=auth.uid());
+
+drop policy if exists office_select on law_offices;
+create policy office_select on law_offices for select to authenticated
+using (owner_user_id=auth.uid() or public.can_access_office(id));
+
+drop policy if exists office_insert on law_offices;
+create policy office_insert on law_offices for insert to authenticated
+with check (owner_user_id=auth.uid());
+
+drop policy if exists office_update on law_offices;
+create policy office_update on law_offices for update to authenticated
+using (public.can_edit_office(id)) with check (public.can_edit_office(id));
+
+drop policy if exists members_select on office_members;
+create policy members_select on office_members for select to authenticated
+using (public.can_access_office(office_id));
+
+drop policy if exists members_owner_write on office_members;
+create policy members_owner_write on office_members for all to authenticated
+using (exists(select 1 from law_offices o where o.id=office_id and o.owner_user_id=auth.uid()))
+with check (exists(select 1 from law_offices o where o.id=office_id and o.owner_user_id=auth.uid()));
+
+drop policy if exists app_state_select on app_state;
+create policy app_state_select on app_state for select to authenticated
+using (public.can_access_office(office_id));
+drop policy if exists app_state_write on app_state;
+create policy app_state_write on app_state for all to authenticated
+using (public.can_edit_office(office_id)) with check (public.can_edit_office(office_id));
+
+-- Office-scoped tables.
 do $$
 declare t text;
 begin
   foreach t in array array[
-    'profiles','law_offices','cases','case_funds','invoices','invoice_lines','bills',
-    'journal_entries','journal_lines','tax_sales','tax_purchases','wht_certificates',
-    'bank_accounts','bank_reconciliations','accounting_periods','documents','audit_log'
+    'cases','case_funds','invoices','bills','journal_entries','tax_sales','tax_purchases',
+    'wht_certificates','bank_accounts','accounting_periods','documents','audit_log'
   ]
   loop
-    execute format('drop policy if exists authenticated_all on %I', t);
-    execute format('create policy authenticated_all on %I for all to authenticated using (true) with check (true)', t);
+    execute format('drop policy if exists office_read on %I',t);
+    execute format('drop policy if exists office_write on %I',t);
+    execute format('create policy office_read on %I for select to authenticated using (public.can_access_office(office_id))',t);
+    execute format('create policy office_write on %I for all to authenticated using (public.can_edit_office(office_id)) with check (public.can_edit_office(office_id))',t);
   end loop;
 end $$;
+
+drop policy if exists invoice_lines_read on invoice_lines;
+create policy invoice_lines_read on invoice_lines for select to authenticated
+using (exists(select 1 from invoices i where i.id=invoice_id and public.can_access_office(i.office_id)));
+drop policy if exists invoice_lines_write on invoice_lines;
+create policy invoice_lines_write on invoice_lines for all to authenticated
+using (exists(select 1 from invoices i where i.id=invoice_id and public.can_edit_office(i.office_id)))
+with check (exists(select 1 from invoices i where i.id=invoice_id and public.can_edit_office(i.office_id)));
+
+drop policy if exists journal_lines_read on journal_lines;
+create policy journal_lines_read on journal_lines for select to authenticated
+using (exists(select 1 from journal_entries j where j.id=journal_id and public.can_access_office(j.office_id)));
+drop policy if exists journal_lines_write on journal_lines;
+create policy journal_lines_write on journal_lines for all to authenticated
+using (exists(select 1 from journal_entries j where j.id=journal_id and public.can_edit_office(j.office_id)))
+with check (exists(select 1 from journal_entries j where j.id=journal_id and public.can_edit_office(j.office_id)));
+
+drop policy if exists bank_recon_read on bank_reconciliations;
+create policy bank_recon_read on bank_reconciliations for select to authenticated
+using (exists(select 1 from bank_accounts b where b.id=bank_account_id and public.can_access_office(b.office_id)));
+drop policy if exists bank_recon_write on bank_reconciliations;
+create policy bank_recon_write on bank_reconciliations for all to authenticated
+using (exists(select 1 from bank_accounts b where b.id=bank_account_id and public.can_edit_office(b.office_id)))
+with check (exists(select 1 from bank_accounts b where b.id=bank_account_id and public.can_edit_office(b.office_id)));
+
+-- Private document bucket. Files must be stored as {office_id}/{uuid}-{filename}.
+insert into storage.buckets(id,name,public)
+values ('law-office-documents','law-office-documents',false)
+on conflict (id) do update set public=false;
+
+drop policy if exists law_docs_select on storage.objects;
+create policy law_docs_select on storage.objects for select to authenticated
+using (
+  bucket_id='law-office-documents'
+  and public.can_access_office((storage.foldername(name))[1]::uuid)
+);
+drop policy if exists law_docs_insert on storage.objects;
+create policy law_docs_insert on storage.objects for insert to authenticated
+with check (
+  bucket_id='law-office-documents'
+  and public.can_edit_office((storage.foldername(name))[1]::uuid)
+);
+drop policy if exists law_docs_update on storage.objects;
+create policy law_docs_update on storage.objects for update to authenticated
+using (
+  bucket_id='law-office-documents'
+  and public.can_edit_office((storage.foldername(name))[1]::uuid)
+)
+with check (
+  bucket_id='law-office-documents'
+  and public.can_edit_office((storage.foldername(name))[1]::uuid)
+);
+drop policy if exists law_docs_delete on storage.objects;
+create policy law_docs_delete on storage.objects for delete to authenticated
+using (
+  bucket_id='law-office-documents'
+  and public.can_edit_office((storage.foldername(name))[1]::uuid)
+);
