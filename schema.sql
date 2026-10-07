@@ -406,3 +406,66 @@ using (
   bucket_id='law-office-documents'
   and public.can_edit_office((storage.foldername(name))[1]::uuid)
 );
+
+
+-- User profile bootstrap.
+create or replace function public.handle_new_user()
+returns trigger language plpgsql security definer set search_path=public
+as $$
+begin
+  insert into public.profiles(id,email,full_name,role)
+  values(new.id,new.email,coalesce(new.raw_user_meta_data->>'full_name',''),'viewer')
+  on conflict (id) do update set email=excluded.email;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+after insert or update of email on auth.users
+for each row execute function public.handle_new_user();
+
+-- Owner-only member management. The invited email must have signed in once so an Auth user exists.
+create or replace function public.add_office_member_by_email(p_office uuid,p_email text,p_role text)
+returns table(user_id uuid,email text,role text)
+language plpgsql security definer set search_path=public,auth
+as $$
+declare u uuid;
+begin
+  if not exists(select 1 from public.law_offices o where o.id=p_office and o.owner_user_id=auth.uid()) then
+    raise exception 'owner permission required';
+  end if;
+  if p_role not in ('viewer','editor') then raise exception 'invalid role'; end if;
+  select id into u from auth.users where lower(auth.users.email)=lower(p_email) limit 1;
+  if u is null then raise exception 'user must sign in once before being added'; end if;
+  insert into public.office_members(office_id,user_id,role)
+  values(p_office,u,p_role)
+  on conflict (office_id,user_id) do update set role=excluded.role;
+  return query select u,p_email,p_role;
+end;
+$$;
+
+create or replace function public.remove_office_member(p_office uuid,p_user uuid)
+returns void language plpgsql security definer set search_path=public
+as $$
+begin
+  if not exists(select 1 from public.law_offices o where o.id=p_office and o.owner_user_id=auth.uid()) then
+    raise exception 'owner permission required';
+  end if;
+  delete from public.office_members where office_id=p_office and user_id=p_user;
+end;
+$$;
+
+create or replace function public.list_office_members(p_office uuid)
+returns table(user_id uuid,email text,role text)
+language sql stable security definer set search_path=public,auth
+as $$
+  select m.user_id,u.email,m.role
+  from public.office_members m join auth.users u on u.id=m.user_id
+  where m.office_id=p_office and public.can_access_office(p_office)
+  order by case m.role when 'owner' then 1 when 'editor' then 2 else 3 end,u.email;
+$$;
+
+grant execute on function public.add_office_member_by_email(uuid,text,text) to authenticated;
+grant execute on function public.remove_office_member(uuid,uuid) to authenticated;
+grant execute on function public.list_office_members(uuid) to authenticated;
