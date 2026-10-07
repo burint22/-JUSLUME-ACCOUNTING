@@ -33,7 +33,7 @@ function top(a,b,c){return '<div class="topbar"><div><h1>'+a+'</h1><div class="s
 function show(name){
  document.querySelectorAll('.page').forEach(function(x){x.classList.add('hidden')});host().classList.remove('hidden');
  document.querySelectorAll('aside nav button').forEach(function(x){x.classList.remove('active')});var b=document.querySelector('[data-v3="'+name+'"]');if(b)b.classList.add('active');
- ({funds:renderFunds,ar:renderAR,ap:renderAP,journal:renderJournal,trial:renderTrial,tax:renderTax,periods:renderPeriods,audit:renderAudit,banks:renderBanks}[name]||renderFunds)();window.scrollTo(0,0)
+ ({funds:renderFunds,ar:renderAR,ap:renderAP,journal:renderJournal,trial:renderTrial,tax:renderTax,periods:renderPeriods,audit:renderAudit,banks:renderBanks,reports:renderReports}[name]||renderFunds)();window.scrollTo(0,0)
 }
 window.showAccountingV3=show;
 function style(){
@@ -42,7 +42,7 @@ function style(){
 }
 function nav(){
  var x=document.querySelector('aside nav');if(!x)return;
- x.innerHTML='<button class="active" data-page="dashboard">ภาพรวม</button><div class="v3g">งานคดี</div><button data-page="cases">รายละเอียดคดี</button><button data-v3="funds">เงินในคดี</button><div class="v3g">การเงิน</div><button data-page="receipts">ใบรับเงิน</button><button data-page="payments">ใบจ่ายเงิน</button><button data-v3="ar">ลูกหนี้ / ใบแจ้งหนี้</button><button data-v3="ap">เจ้าหนี้ / ใบตั้งหนี้</button><button data-v3="banks">เงินสดและธนาคาร</button><div class="v3g">บัญชี</div><button data-page="accounting">บัญชีรับ - จ่าย</button><button data-v3="journal">สมุดรายวัน</button><button data-v3="trial">งบทดลอง</button><button data-v3="periods">ปิดงวดบัญชี</button><div class="v3g">ภาษี</div><button data-v3="tax">VAT / WHT / 50 ทวิ</button><div class="v3g">ควบคุม</div><button data-page="reports">รายงาน</button><button data-v3="audit">Audit Log</button><button data-page="office">ตั้งค่าสำนักงาน</button>';
+ x.innerHTML='<button class="active" data-page="dashboard">ภาพรวม</button><div class="v3g">งานคดี</div><button data-page="cases">รายละเอียดคดี</button><button data-v3="funds">เงินในคดี</button><div class="v3g">การเงิน</div><button data-page="receipts">ใบรับเงิน</button><button data-page="payments">ใบจ่ายเงิน</button><button data-v3="ar">ลูกหนี้ / ใบแจ้งหนี้</button><button data-v3="ap">เจ้าหนี้ / ใบตั้งหนี้</button><button data-v3="banks">เงินสดและธนาคาร</button><div class="v3g">บัญชี</div><button data-page="accounting">บัญชีรับ - จ่าย</button><button data-v3="journal">สมุดรายวัน</button><button data-v3="trial">งบทดลอง</button><button data-v3="periods">ปิดงวดบัญชี</button><div class="v3g">ภาษี</div><button data-v3="tax">VAT / WHT / 50 ทวิ</button><div class="v3g">ควบคุม</div><button data-v3="reports">รายงานบริหาร</button><button data-v3="audit">Audit Log</button><button data-page="office">ตั้งค่าสำนักงาน</button>';
  document.querySelectorAll('[data-v3]').forEach(function(b){b.onclick=function(){show(this.dataset.v3)}})
 }
 function renderFunds(){
@@ -93,6 +93,42 @@ window.closePeriod=function(){var label=prompt('ชื่องวด เช่�
 window.openPeriod=function(i){var x=db.periods.find(function(z){return z.id===i});if(!x)return;var r=prompt('เหตุผลการเปิดงวด');if(!r)return;var fn=function(){x.status='open';x.reason=r;log('OPEN_PERIOD','period',x.id,r);save();renderPeriods()};if(typeof requestSecureAction==='function')requestSecureAction('เปิดงวดบัญชี '+x.label,fn);else fn()};
 function renderBanks(){host().innerHTML=top('เงินสดและธนาคาร','ทะเบียนบัญชีและกระทบยอดกับ Statement','<button class="btn primary" onclick="addBank()">+ เพิ่มบัญชี</button>')+'<div class="card v3table"><table><thead><tr><th>ธนาคาร</th><th>ชื่อบัญชี</th><th>เลขบัญชี</th><th>ยอดตามระบบ</th><th>ยอด Statement</th><th>ผลต่าง</th></tr></thead><tbody>'+(db.banks.length?db.banks.map(function(x){return '<tr><td>'+e(x.bank)+'</td><td>'+e(x.name)+'</td><td>'+e(x.no)+'</td><td>'+money(x.system)+'</td><td>'+money(x.statement)+'</td><td>'+money(n(x.statement)-n(x.system))+'</td></tr>'}).join(''):'<tr><td colspan="6">ยังไม่มีบัญชีธนาคาร</td></tr>')+'</tbody></table></div>'}
 window.addBank=function(){var bank=prompt('ธนาคาร');if(!bank)return;var x={id:id('bank'),bank:bank,name:prompt('ชื่อบัญชี')||'',no:prompt('เลขบัญชี')||'',system:n(prompt('ยอดตามระบบ','0')),statement:n(prompt('ยอดตาม Statement','0'))};db.banks.push(x);log('CREATE','bank',x.id,bank);save();renderBanks()};
+
+function renderReports(){
+ var income=0,advance=0,client=0;
+ db.funds.forEach(function(x){var a=(x.dir==='in'?1:-1)*n(x.amount);if(x.bucket==='office')income+=a;if(x.bucket==='advance')advance+=a;if(x.bucket==='client')client+=a});
+ var expense=db.bills.reduce(function(s,x){return s+n(x.base)},0);
+ var ar=db.invoices.reduce(function(s,x){return s+Math.max(0,calcInv(x).net-n(x.paid))},0);
+ var ap=db.bills.reduce(function(s,x){return s+Math.max(0,n(x.total)-n(x.paid))},0);
+ var caseIds={};cases().forEach(function(x){caseIds[x.id]=true});db.funds.forEach(function(x){if(x.caseId)caseIds[x.caseId]=true});db.invoices.forEach(function(x){if(x.caseId)caseIds[x.caseId]=true});db.bills.forEach(function(x){if(x.caseId)caseIds[x.caseId]=true});
+ var rows=Object.keys(caseIds).map(function(cid){
+   var revenue=db.invoices.filter(function(x){return x.caseId===cid}).reduce(function(s,x){return s+calcInv(x).base},0);
+   revenue+=db.funds.filter(function(x){return x.caseId===cid&&x.bucket==='office'}).reduce(function(s,x){return s+(x.dir==='in'?n(x.amount):-n(x.amount))},0);
+   var cost=db.bills.filter(function(x){return x.caseId===cid}).reduce(function(s,x){return s+n(x.base)},0);
+   cost+=db.funds.filter(function(x){return x.caseId===cid&&x.bucket==='office'&&x.dir==='out'}).reduce(function(s,x){return s+n(x.amount)},0);
+   var adv=db.funds.filter(function(x){return x.caseId===cid&&x.bucket==='advance'}).reduce(function(s,x){return s+(x.dir==='in'?n(x.amount):-n(x.amount))},0);
+   var cli=db.funds.filter(function(x){return x.caseId===cid&&x.bucket==='client'}).reduce(function(s,x){return s+(x.dir==='in'?n(x.amount):-n(x.amount))},0);
+   return '<tr><td>'+e(caseLabel(cid))+'</td><td>'+money(revenue)+'</td><td>'+money(cost)+'</td><td>'+money(revenue-cost)+'</td><td>'+money(adv)+'</td><td>'+money(cli)+'</td></tr>';
+ }).join('');
+ host().innerHTML=top('รายงานบริหาร','ภาพรวมสำนักงาน กำไร–ขาดทุน ลูกหนี้ เจ้าหนี้ และผลประกอบการรายคดี','<button class="btn" onclick="exportManagementCSV()">ส่งออก CSV</button>')+
+ '<div class="v3stat"><div class="card"><small>รายได้สำนักงาน</small><strong>'+money(income)+'</strong></div><div class="card"><small>ค่าใช้จ่ายตั้งหนี้</small><strong>'+money(expense)+'</strong></div><div class="card"><small>กำไรโดยประมาณ</small><strong>'+money(income-expense)+'</strong></div><div class="card"><small>ลูกหนี้ / เจ้าหนี้</small><strong>'+money(ar)+' / '+money(ap)+'</strong></div></div>'+
+ '<div class="card v3table"><h3>กำไรและเงินคงเหลือรายคดี</h3><table><thead><tr><th>คดี</th><th>รายได้</th><th>ต้นทุน</th><th>กำไร</th><th>เงินทดรองคงเหลือ</th><th>เงินลูกความคงเหลือ</th></tr></thead><tbody>'+(rows||'<tr><td colspan="6">ยังไม่มีข้อมูล</td></tr>')+'</tbody></table></div>';
+}
+window.exportManagementCSV=function(){
+ var rows=[['คดี','รายได้','ต้นทุน','กำไร','เงินทดรอง','เงินลูกความ']];
+ var ids={};cases().forEach(function(x){ids[x.id]=1});db.funds.forEach(function(x){if(x.caseId)ids[x.caseId]=1});db.invoices.forEach(function(x){if(x.caseId)ids[x.caseId]=1});db.bills.forEach(function(x){if(x.caseId)ids[x.caseId]=1});
+ Object.keys(ids).forEach(function(cid){
+   var revenue=db.invoices.filter(function(x){return x.caseId===cid}).reduce(function(s,x){return s+calcInv(x).base},0);
+   revenue+=db.funds.filter(function(x){return x.caseId===cid&&x.bucket==='office'}).reduce(function(s,x){return s+(x.dir==='in'?n(x.amount):-n(x.amount))},0);
+   var cost=db.bills.filter(function(x){return x.caseId===cid}).reduce(function(s,x){return s+n(x.base)},0);
+   var adv=db.funds.filter(function(x){return x.caseId===cid&&x.bucket==='advance'}).reduce(function(s,x){return s+(x.dir==='in'?n(x.amount):-n(x.amount))},0);
+   var cli=db.funds.filter(function(x){return x.caseId===cid&&x.bucket==='client'}).reduce(function(s,x){return s+(x.dir==='in'?n(x.amount):-n(x.amount))},0);
+   rows.push([caseLabel(cid),revenue,cost,revenue-cost,adv,cli]);
+ });
+ var csv='\ufeff'+rows.map(function(r){return r.map(function(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}).join(',')}).join('\n');
+ var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='JUSLUME-MANAGEMENT-'+day()+'.csv';a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},1000)
+}
+
 function renderAudit(){host().innerHTML=top('Audit Log','ประวัติการสร้าง Post กลับรายการ ปิดงวด และเปิดงวด')+'<div class="card v3table"><table><thead><tr><th>วันเวลา</th><th>ผู้ใช้</th><th>เหตุการณ์</th><th>ประเภท</th><th>รายละเอียด</th></tr></thead><tbody>'+(db.audit.length?db.audit.map(function(x){return '<tr><td>'+new Date(x.at).toLocaleString('th-TH')+'</td><td>'+e(x.actor)+'</td><td>'+e(x.action)+'</td><td>'+e(x.type)+'</td><td>'+e(x.detail)+'</td></tr>'}).join(''):'<tr><td colspan="5">ยังไม่มีข้อมูล</td></tr>')+'</tbody></table></div>'}
 function patchDelete(){window.requestDelete=function(group,i,label){if(group==='receipts'||group==='payments'){log('BLOCK_DELETE',group,i,label);return alert('เอกสารการเงินที่ยืนยันแล้วไม่อนุญาตให้ลบ ให้ยกเลิกหรือกลับรายการเพื่อคง Audit Trail')}var fn=function(){if(window.appData&&appData[group]){appData[group]=appData[group].filter(function(x){return x.id!==i});if(typeof saveAppData==='function')saveAppData();if(typeof renderData==='function')renderData();log('DELETE',group,i,label)}};if(typeof requestSecureAction==='function')requestSecureAction('ลบ '+label,fn);else fn()}}
 function dashboard(){var sec=document.getElementById('v3dash');if(!sec){sec=document.createElement('div');sec.id='v3dash';sec.className='section';var d=document.getElementById('dashboard');var before=d&&d.querySelector('.section');if(d)d.insertBefore(sec,before)}if(!sec)return;var off=0,adv=0,cli=0;db.funds.forEach(function(x){var a=(x.dir==='in'?1:-1)*n(x.amount);if(x.bucket==='office')off+=a;if(x.bucket==='advance')adv+=a;if(x.bucket==='client')cli+=a});var ar=db.invoices.reduce(function(s,x){return s+Math.max(0,calcInv(x).net-n(x.paid))},0);sec.innerHTML='<div class="card"><div class="head"><h2>บัญชีสำนักงาน V3</h2></div><div class="v3stat"><div><small>รายได้สำนักงาน</small><strong>'+money(off)+'</strong></div><div><small>เงินทดรองคดี</small><strong>'+money(adv)+'</strong></div><div><small>เงินของลูกความ</small><strong>'+money(cli)+'</strong></div><div><small>ลูกหนี้คงเหลือ</small><strong>'+money(ar)+'</strong></div></div></div>'}
