@@ -135,4 +135,5 @@ function dashboard(){var sec=document.getElementById('v3dash');if(!sec){sec=docu
 style();nav();host();patchDelete();dashboard();
 var banner=document.getElementById('testModeBanner');if(banner)banner.textContent='JUSLUME ACCOUNTING V3 — เอกสารการเงินที่ยืนยันแล้วไม่ลบโดยตรง • โหมดทดลองยังเก็บข้อมูลในเบราว์เซอร์จนกว่าจะเชื่อม Supabase ตาม schema.sql';
 log('BOOT','system','v3','Accounting V3 loaded');
+var cloudScript=document.createElement('script');cloudScript.src='cloud.js';cloudScript.defer=true;document.body.appendChild(cloudScript);
 })();
