@@ -43,7 +43,15 @@ function style(){
 function nav(){
  var x=document.querySelector('aside nav');if(!x)return;
  x.innerHTML='<button class="active" data-page="dashboard">ภาพรวม</button><div class="v3g">งานคดี</div><button data-page="cases">รายละเอียดคดี</button><button data-v3="funds">เงินในคดี</button><div class="v3g">การเงิน</div><button data-page="receipts">ใบรับเงิน</button><button data-page="payments">ใบจ่ายเงิน</button><button data-v3="ar">ลูกหนี้ / ใบแจ้งหนี้</button><button data-v3="ap">เจ้าหนี้ / ใบตั้งหนี้</button><button data-v3="banks">เงินสดและธนาคาร</button><div class="v3g">บัญชี</div><button data-page="accounting">บัญชีรับ - จ่าย</button><button data-v3="journal">สมุดรายวัน</button><button data-v3="trial">งบทดลอง</button><button data-v3="periods">ปิดงวดบัญชี</button><div class="v3g">ภาษี</div><button data-v3="tax">VAT / WHT / 50 ทวิ</button><div class="v3g">ควบคุม</div><button data-v3="reports">รายงานบริหาร</button><button data-v3="audit">Audit Log</button><button data-page="office">ตั้งค่าสำนักงาน</button>';
- document.querySelectorAll('[data-v3]').forEach(function(b){b.onclick=function(){show(this.dataset.v3)}})
+ document.querySelectorAll('[data-v3]').forEach(function(b){b.onclick=function(){show(this.dataset.v3)}});
+ document.querySelectorAll('aside nav [data-page]').forEach(function(b){
+   b.onclick=function(){
+     var page=this.dataset.page;
+     if(typeof window.showPage==='function')window.showPage(page);
+     document.querySelectorAll('aside nav button').forEach(function(x){x.classList.remove('active')});
+     this.classList.add('active');
+   };
+ });
 }
 function renderFunds(){
  var office=0,advance=0,client=0;db.funds.forEach(function(x){var z=(x.dir==='in'?1:-1)*n(x.amount);if(x.bucket==='office')office+=z;if(x.bucket==='advance')advance+=z;if(x.bucket==='client')client+=z});
