@@ -10,11 +10,11 @@
     :root{--wine:#3a0812;--wine2:#58101f;--gold:#c7a45a;--bg:#f6f3f1;--card:#fff;--ink:#201a1b;--muted:#756c6f;--line:#eadfe1;--ok:#176b4b;--danger:#9f2f3d}
     *{box-sizing:border-box} body{margin:0;font-family:Inter,"Noto Sans Thai",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
     button,input,select,textarea{font:inherit}.app{min-height:100vh;display:grid;grid-template-columns:265px 1fr}
-    aside{background:linear-gradient(180deg,var(--wine),#26050c);color:#fff;padding:24px 18px;position:sticky;top:0;height:100vh}
+    aside{background:linear-gradient(180deg,var(--wine),#26050c);color:#fff;padding:24px 18px;position:sticky;top:0;height:100vh;overflow-y:auto;overflow-x:hidden}
     .brand{display:flex;gap:12px;align-items:center;margin-bottom:28px}.logo{width:42px;height:42px;border:1px solid rgba(255,255,255,.28);border-radius:12px;display:grid;place-items:center;color:var(--gold);font-weight:800;overflow:hidden;background:rgba(255,255,255,.04)}
     .logo img{width:100%;height:100%;object-fit:contain}.brand b{display:block;letter-spacing:.06em}.brand small{opacity:.68}
     nav{display:grid;gap:7px}nav button{border:0;background:transparent;color:#f7ecee;text-align:left;padding:11px 12px;border-radius:10px;cursor:pointer}nav button:hover,nav button.active{background:rgba(255,255,255,.11)}
-    .side-note{position:absolute;bottom:22px;left:18px;right:18px;color:#d9c7cb;font-size:12px;line-height:1.6}
+    .side-note{position:static;margin-top:24px;padding:14px 12px;color:#d9c7cb;font-size:12px;line-height:1.6;border-top:1px solid rgba(255,255,255,.10)}
     main{padding:28px}.topbar{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:24px}
     h1{font-size:26px;margin:0}.sub{color:var(--muted);margin-top:4px;font-size:14px}.top-actions{display:flex;gap:10px;flex-wrap:wrap}
     .btn{border:1px solid var(--line);background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}.btn.primary{background:var(--wine2);border-color:var(--wine2);color:#fff}.btn.gold{background:#f5ecd9;border-color:#e4cf9d;color:#5b4210}
