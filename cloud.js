@@ -16,6 +16,15 @@ function status(t,kind){
 function snapshot(){return window.getJuslumeV3State?window.getJuslumeV3State():null}
 async function ensureOffice(){
   var s=sb();if(!s||!currentUser)return null;
+  await s.rpc('claim_office_invitation');
+  var mem=await s.from('office_members').select('office_id,role').eq('user_id',currentUser.id).order('created_at',{ascending:true}).limit(1);
+  if(mem.error)throw mem.error;
+  if(mem.data&&mem.data[0]){
+    officeId=mem.data[0].office_id;currentRole=mem.data[0].role||'viewer';
+    var mo=await s.from('law_offices').select('*').eq('id',officeId).single();
+    if(mo.error)throw mo.error;
+    return mo.data;
+  }
   var r=await s.from('law_offices').select('*').eq('owner_user_id',currentUser.id).limit(1);
   if(r.error)throw r.error;
   var o=r.data&&r.data[0];
@@ -148,14 +157,15 @@ async function listMembers(){
   var s=sb();var r=await s.rpc('list_office_members',{p_office:officeId});
   if(r.error){box.innerHTML='<div class="small">สมาชิก: '+esc(r.error.message)+'</div>';return}
   var rows=(r.data||[]).map(function(x){return '<tr><td>'+esc(x.email)+'</td><td>'+esc(x.role)+'</td><td>'+(currentRole==='owner'&&x.role!=='owner'?'<button class="iconBtn danger" data-user="'+esc(x.user_id)+'" onclick="JuslumeCloud.removeMember(this.dataset.user)">ลบสิทธิ์</button>':'—')+'</td></tr>'}).join('');
-  box.innerHTML='<div class="head"><h2>ผู้ใช้งานสำนักงาน</h2></div>'+(currentRole==='owner'?'<div class="v3form"><label>อีเมล<input id="memberEmail" type="email"></label><label>สิทธิ์<select id="memberRole"><option value="viewer">Viewer — ดูอย่างเดียว</option><option value="editor">Editor — เพิ่ม/แก้ไข</option></select></label><label style="align-self:end"><button class="btn primary" onclick="JuslumeCloud.addMember()">เพิ่มผู้ใช้</button></label></div><div class="hint">อีเมลนั้นต้องเข้าสู่ระบบด้วย OTP อย่างน้อย 1 ครั้งก่อนจึงเพิ่มสิทธิ์ได้</div>':'')+'<div class="v3table" style="margin-top:10px"><table><thead><tr><th>อีเมล</th><th>สิทธิ์</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="3">ยังไม่มีสมาชิก</td></tr>')+'</tbody></table></div>';
+  box.innerHTML='<div class="head"><h2>ผู้ใช้งานสำนักงาน</h2></div>'+(currentRole==='owner'?'<div class="v3form"><label>อีเมล<input id="memberEmail" type="email"></label><label>สิทธิ์<select id="memberRole"><option value="viewer">Viewer — ดูอย่างเดียว</option><option value="editor">Editor — เพิ่ม/แก้ไข</option></select></label><label style="align-self:end"><button class="btn primary" onclick="JuslumeCloud.addMember()">เพิ่มผู้ใช้</button></label></div><div class="hint">Owner เชิญอีเมลได้ทันที เมื่อผู้รับเข้าสู่ Cloud ด้วย OTP ระบบจะรับสิทธิ์ Viewer/Editor ของสำนักงานนี้อัตโนมัติ</div>':'')+'<div class="v3table" style="margin-top:10px"><table><thead><tr><th>อีเมล</th><th>สิทธิ์</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="3">ยังไม่มีสมาชิก</td></tr>')+'</tbody></table></div>';
 }
 async function addMember(){
   if(currentRole!=='owner')return alert('เฉพาะ Owner เท่านั้น');
   var email=(document.getElementById('memberEmail')||{}).value||'',role=(document.getElementById('memberRole')||{}).value||'viewer';
   if(!email.trim())return alert('กรุณาระบุอีเมล');
-  var r=await sb().rpc('add_office_member_by_email',{p_office:officeId,p_email:email.trim(),p_role:role});
-  if(r.error)return alert('เพิ่มผู้ใช้ไม่สำเร็จ: '+r.error.message);
+  var r=await sb().rpc('invite_office_member',{p_office:officeId,p_email:email.trim(),p_role:role});
+  if(r.error)return alert('เชิญผู้ใช้ไม่สำเร็จ: '+r.error.message);
+  alert('บันทึกคำเชิญแล้ว ผู้รับใช้อีเมลนี้เข้าสู่ Cloud ด้วย OTP แล้วระบบจะรับสิทธิ์อัตโนมัติ');
   await listMembers();
 }
 async function removeMember(userId){
