@@ -20,3 +20,15 @@ jobs:
           test -f index.html
           test -f schema.sql
           test -f SUPABASE_SETUP.md
+      - name: Validate index script placement
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s=Path("index.html").read_text(encoding="utf-8")
+          assert s.count('<script src="v3.js"></script>') == 1, "v3.js must be loaded exactly once"
+          pos=s.rfind('<script src="v3.js"></script>')
+          main_close=s.rfind('</script>',0,pos)
+          assert main_close != -1 and pos > main_close, "v3.js tag must be outside the main inline script"
+          assert '<script src="v3.js"></script>' not in s[s.find("var html='<!doctype"):main_close], "v3.js leaked into printable HTML string"
+          print("index script placement OK")
+          PY
