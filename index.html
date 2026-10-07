@@ -454,7 +454,7 @@
 <script>
   var navButtons=[].slice.call(document.querySelectorAll('nav button'));
   navButtons.forEach(function(b){b.addEventListener('click',function(){showPage(b.dataset.page)})});
-  function showPage(id){document.querySelectorAll('.page').forEach(function(p){p.classList.add('hidden')});var el=document.getElementById(id);if(el)el.classList.remove('hidden');navButtons.forEach(function(b){b.classList.toggle('active',b.dataset.page===id)});window.scrollTo({top:0,behavior:'smooth'})}
+  function showPage(id){document.querySelectorAll('.page').forEach(function(p){p.classList.add('hidden')});var el=document.getElementById(id);if(!el){console.error('Page not found:',id);return}el.classList.remove('hidden');document.querySelectorAll('aside nav button').forEach(function(b){b.classList.toggle('active',b.dataset.page===id)});window.scrollTo({top:0,behavior:'smooth'})}
   function val(id){var e=document.getElementById(id);return e?e.value:''}
   function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v||'—'}
   function money(n){return '฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})}
