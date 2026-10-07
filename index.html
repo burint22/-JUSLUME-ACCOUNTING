@@ -31,6 +31,8 @@
     .docname{font-weight:800;font-size:18px}.small{font-size:12px;color:var(--muted);line-height:1.6}.doctype{text-align:right}.doctype b{font-size:20px;color:var(--wine2)}.docgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px;margin-top:18px;font-size:14px}.docgrid b{color:var(--muted);font-weight:500}.moneybox{margin-top:14px;border-top:1px solid var(--line);padding-top:12px;display:grid;grid-template-columns:1fr auto;gap:6px 18px;max-width:520px;margin-left:auto}.moneybox strong{font-size:18px}
     .logoPreview{width:86px;height:86px;border:1px solid var(--line);border-radius:12px;display:grid;place-items:center;overflow:hidden;background:#fff}.logoPreview img{max-width:100%;max-height:100%;object-fit:contain}
     .notice{border-left:4px solid var(--gold);background:#fffaf0;padding:12px 14px;border-radius:8px;font-size:13px;line-height:1.6;margin-bottom:16px}
+    .taxpanel{background:#faf8f7;border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:12px}.taxpanel h3{font-size:14px;margin:0 0 10px}.taxline{display:grid;grid-template-columns:1fr auto;gap:8px;padding:5px 0}.taxline.total{font-weight:800;font-size:17px;border-top:1px solid var(--line);margin-top:6px;padding-top:10px}
+    .req{color:var(--danger)}.error{border-color:var(--danger)!important;background:#fff7f8!important}.errorText{color:var(--danger);font-size:12px;margin-top:6px}
     .mobilebar{display:none}
     @media(max-width:1100px){.grid4{grid-template-columns:1fr 1fr}.formgrid.three{grid-template-columns:1fr 1fr}.checks{grid-template-columns:1fr 1fr}}
     @media(max-width:900px){.app{grid-template-columns:1fr}aside{display:none}main{padding:18px 14px 78px}.section{grid-template-columns:1fr}.mobilebar{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);z-index:5}.mobilebar button{border:0;background:#fff;padding:12px 4px;font-size:12px}}
@@ -158,16 +160,26 @@
           <label>รับเงินจากฝ่าย<select id="rSide" onchange="syncReceipt()"><option>โจทก์</option><option>จำเลย</option><option>ผู้ร้อง</option><option>ผู้คัดค้าน</option><option>บุคคลภายนอก</option><option>อื่น ๆ</option></select></label>
         </div>
         <div class="divider"></div>
-        <div class="form-title">ผู้ชำระ / ผู้รับบริการ</div>
+        <div class="form-title">ข้อมูลผู้ชำระเงิน</div>
         <div class="formgrid three">
-          <label>ชื่อผู้ชำระเงิน<input id="rPayer" placeholder="ชื่อบุคคล / นิติบุคคล" oninput="syncReceipt()"></label>
+          <label>ประเภทผู้ชำระ
+            <select id="rPayerType" onchange="togglePayerType();autoReceiptTax();syncReceipt()">
+              <option value="person">บุคคลธรรมดา</option>
+              <option value="company">นิติบุคคล / บริษัท</option>
+            </select>
+          </label>
+          <label id="rCompanyWrap" class="hidden">ชื่อนิติบุคคล / บริษัท <span class="req">*</span><input id="rCompanyName" placeholder="ชื่อบริษัท / ห้างหุ้นส่วน / นิติบุคคล" oninput="syncReceipt()"></label>
+          <label>คำนำหน้าชื่อ<input id="rTitle" placeholder="นาย / นาง / นางสาว / อื่น ๆ" oninput="syncReceipt()"></label>
+          <label>ชื่อ<input id="rFirstName" placeholder="ชื่อ" oninput="syncReceipt()"></label>
+          <label>ชื่อรอง<input id="rMiddleName" placeholder="ชื่อรอง (ถ้ามี)" oninput="syncReceipt()"></label>
+          <label>นามสกุล<input id="rLastName" placeholder="นามสกุล" oninput="syncReceipt()"></label>
           <label>เลขบัตรประชาชน / เลขนิติบุคคล / เลขผู้เสียภาษี<input id="rPayerId" maxlength="13" placeholder="13 หลัก" oninput="syncReceipt()"></label>
           <label>เบอร์โทรศัพท์<input id="rPayerPhone" placeholder="เบอร์โทรศัพท์"></label>
           <label class="span2">ที่อยู่ผู้ชำระ / ผู้รับบริการ<textarea id="rPayerAddress" placeholder="ที่อยู่" oninput="syncReceipt()"></textarea></label>
           <label>วิธีรับเงิน<select id="rMethod" onchange="syncReceipt()"><option>โอนเงิน</option><option>เงินสด</option><option>เช็ค</option><option>บัตร / QR</option><option>อื่น ๆ</option></select></label>
         </div>
         <div class="divider"></div>
-        <div class="form-title">ติ๊กรายการรับเงิน</div>
+        <div class="form-title">รายการรับเงิน</div>
         <div class="checks" id="receiptChecks">
           <label class="check"><input type="checkbox" value="ค่าทนายความ" onchange="syncReceipt()"> ค่าทนายความ</label>
           <label class="check"><input type="checkbox" value="ค่าปรึกษากฎหมาย" onchange="syncReceipt()"> ค่าปรึกษากฎหมาย</label>
@@ -179,15 +191,41 @@
           <label class="check"><input type="checkbox" value="เงินรับแทนลูกความ" onchange="syncReceipt()"> เงินรับแทนลูกความ</label>
           <label class="check"><input type="checkbox" value="อื่น ๆ" onchange="toggleOther('rOtherWrap',this.checked);syncReceipt()"> อื่น ๆ</label>
         </div>
-        <div id="rOtherWrap" class="hidden" style="margin-top:10px"><label>ระบุรายการอื่น ๆ<input id="rOther" oninput="syncReceipt()" placeholder="ระบุรายการ"></label></div>
+        <div id="rOtherWrap" class="hidden" style="margin-top:10px"><label>ระบุรายการอื่น ๆ <span class="req">*</span><input id="rOther" oninput="clearFieldError(this);syncReceipt()" placeholder="ต้องระบุรายการก่อนบันทึกหรือดำเนินการต่อ"></label><div id="rOtherError" class="errorText hidden">กรุณาระบุรายการอื่น ๆ</div></div>
         <div class="divider"></div>
         <div class="formgrid three">
-          <label>ยอดก่อนภาษี / ยอดรายการ (บาท)<input id="rSubtotal" type="number" min="0" step="0.01" placeholder="0.00" oninput="syncReceipt()"></label>
-          <label>ภาษีมูลค่าเพิ่ม<select id="rVatMode" onchange="syncReceipt()"><option value="none">ไม่คิด VAT</option><option value="add">บวก VAT 7%</option><option value="included">ยอดรวม VAT 7% แล้ว</option></select></label>
-          <label>ภาษีหัก ณ ที่จ่าย (บาท)<input id="rWht" type="number" min="0" step="0.01" value="0" oninput="syncReceipt()"></label>
+          <label>ยอดค่าบริการ / ยอดรายการ (บาท)<input id="rSubtotal" type="number" min="0" step="0.01" placeholder="0.00" oninput="autoReceiptTax();syncReceipt()"></label>
+          <label>VAT
+            <select id="rVatMode" onchange="syncReceipt()">
+              <option value="auto">อัตโนมัติตามข้อมูลสำนักงาน</option>
+              <option value="none">ไม่คิด VAT</option>
+              <option value="add">บวก VAT 7%</option>
+              <option value="included">ยอดรวม VAT 7% แล้ว</option>
+            </select>
+          </label>
+          <label>ภาษีหัก ณ ที่จ่าย
+            <select id="rWhtMode" onchange="autoReceiptTax(true);syncReceipt()">
+              <option value="auto">อัตโนมัติตามประเภทผู้ชำระ</option>
+              <option value="0">0%</option>
+              <option value="1">1%</option>
+              <option value="3">3%</option>
+              <option value="5">5%</option>
+            </select>
+          </label>
           <label>บัญชีที่รับเงิน<input id="rBank" placeholder="ธนาคาร / เลขบัญชี / ชื่อบัญชี" oninput="syncReceipt()"></label>
-          <label>ผู้รับเงิน / ผู้บันทึก<input id="rReceiver" placeholder="ชื่อผู้รับเงิน"></label>
+          <label>ลงชื่อผู้จ่ายเงิน<input id="rPayerSigner" placeholder="ชื่อผู้จ่ายเงิน / ผู้แทนผู้ชำระ" oninput="syncReceipt()"></label>
+          <label>ลงชื่อผู้รับเงิน<input id="rReceiver" placeholder="ชื่อผู้รับเงิน" oninput="syncReceipt()"></label>
           <label>หมายเหตุ<input id="rNote" placeholder="หมายเหตุ"></label>
+        </div>
+        <div class="taxpanel">
+          <h3>คำนวณภาษีอัตโนมัติ</h3>
+          <div class="taxline"><span>สถานะผู้ชำระ</span><span id="rTaxPayerLabel">บุคคลธรรมดา</span></div>
+          <div class="taxline"><span>อัตราหัก ณ ที่จ่าย</span><span id="rWhtRateView">0%</span></div>
+          <div class="taxline"><span>ฐานค่าบริการ</span><span id="rBaseView">฿0.00</span></div>
+          <div class="taxline"><span>VAT</span><span id="rVatView">฿0.00</span></div>
+          <div class="taxline"><span>หัก ณ ที่จ่าย</span><span id="rWhtView">฿0.00</span></div>
+          <div class="taxline total"><span>รับสุทธิ</span><span id="rNetView">฿0.00</span></div>
+          <div class="hint">ค่าเริ่มต้น: ผู้ชำระเป็นนิติบุคคลและเป็นค่าบริการวิชาชีพกฎหมาย ระบบเสนอหัก ณ ที่จ่าย 3%; บุคคลธรรมดาเสนอ 0%. ผู้ใช้ยังเปลี่ยนอัตราได้เมื่อข้อเท็จจริงทางภาษีต่างออกไป</div>
         </div>
         <div class="divider"></div>
         <div class="filebox"><label>แนบหลักฐานการรับเงิน<input id="rFile" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" onchange="showFileNames('rFile','rFiles')"></label><div id="rFiles" class="hint">ยังไม่ได้เลือกไฟล์</div></div>
@@ -209,7 +247,7 @@
           </div>
           <div class="moneybox"><span>มูลค่าก่อน VAT</span><span id="rpBase">฿0.00</span><span>VAT 7%</span><span id="rpVat">฿0.00</span><span>หัก ณ ที่จ่าย</span><span id="rpWht">฿0.00</span><strong>รับสุทธิ</strong><strong id="rpNet">฿0.00</strong></div>
         </div>
-        <div class="top-actions" style="margin-top:16px"><button class="btn primary" onclick="prototypeSave()">บันทึกรายการ</button><button class="btn gold" onclick="printDocument('receipt')">พิมพ์ / ออกใบรับเงิน</button></div>
+        <div class="top-actions" style="margin-top:16px"><button class="btn primary" onclick="saveDocument('receipt')">บันทึกรายการ</button><button class="btn gold" onclick="printDocument('receipt')">พิมพ์ / ออกใบรับเงิน</button></div>
       </div>
     </section>
 
@@ -238,7 +276,7 @@
           <label>บัญชีที่จ่าย<input id="pBank" placeholder="ธนาคาร / เลขบัญชี / ชื่อบัญชี" oninput="syncPayment()"></label>
         </div>
         <div class="divider"></div>
-        <div class="form-title">ติ๊กรายการจ่ายเงิน</div>
+        <div class="form-title">รายการจ่ายเงิน</div>
         <div class="checks" id="paymentChecks">
           <label class="check"><input type="checkbox" value="ค่าธรรมเนียมศาล" onchange="syncPayment()"> ค่าธรรมเนียมศาล</label>
           <label class="check"><input type="checkbox" value="ค่าทนายร่วม / ผู้ช่วย" onchange="syncPayment()"> ค่าทนายร่วม / ผู้ช่วย</label>
@@ -251,14 +289,15 @@
           <label class="check"><input type="checkbox" value="ค่าใช้จ่ายสำนักงาน" onchange="syncPayment()"> ค่าใช้จ่ายสำนักงาน</label>
           <label class="check"><input type="checkbox" value="อื่น ๆ" onchange="toggleOther('pOtherWrap',this.checked);syncPayment()"> อื่น ๆ</label>
         </div>
-        <div id="pOtherWrap" class="hidden" style="margin-top:10px"><label>ระบุรายการอื่น ๆ<input id="pOther" oninput="syncPayment()" placeholder="ระบุรายการ"></label></div>
+        <div id="pOtherWrap" class="hidden" style="margin-top:10px"><label>ระบุรายการอื่น ๆ <span class="req">*</span><input id="pOther" oninput="clearFieldError(this);syncPayment()" placeholder="ต้องระบุรายการก่อนบันทึกหรือดำเนินการต่อ"></label><div id="pOtherError" class="errorText hidden">กรุณาระบุรายการอื่น ๆ</div></div>
         <div class="divider"></div>
         <div class="formgrid three">
           <label>จำนวนเงิน (บาท)<input id="pAmount" type="number" min="0" step="0.01" placeholder="0.00" oninput="syncPayment()"></label>
-          <label>ภาษีหัก ณ ที่จ่าย (บาท)<input id="pWht" type="number" min="0" step="0.01" value="0" oninput="syncPayment()"></label>
+          <label>อัตราภาษีหัก ณ ที่จ่าย<select id="pWhtRate" onchange="syncPayment()"><option value="0">0%</option><option value="1">1%</option><option value="3" selected>3%</option><option value="5">5%</option></select></label>
           <label>ยอดจ่ายสุทธิ<input id="pNetView" readonly value="0.00"></label>
           <label>ผู้อนุมัติ<input id="pApprover" placeholder="ชื่อผู้อนุมัติ"></label>
-          <label>ผู้จ่ายเงิน<input id="pPayerOfficer" placeholder="ชื่อผู้จ่ายเงิน"></label>
+          <label>ลงชื่อผู้จ่ายเงิน<input id="pPayerOfficer" placeholder="ชื่อผู้จ่ายเงิน / ผู้อนุมัติจ่าย"></label>
+          <label>ลงชื่อผู้รับเงิน<input id="pPayeeSigner" placeholder="ชื่อผู้รับเงิน" oninput="syncPayment()"></label>
           <label>หมายเหตุ<input id="pNote" placeholder="หมายเหตุ"></label>
         </div>
         <div class="divider"></div>
@@ -279,30 +318,30 @@
           </div>
           <div class="moneybox"><span>ยอดค่าใช้จ่าย</span><span id="ppAmount">฿0.00</span><span>หัก ณ ที่จ่าย</span><span id="ppWht">฿0.00</span><strong>จ่ายสุทธิ</strong><strong id="ppNet">฿0.00</strong></div>
         </div>
-        <div class="top-actions" style="margin-top:16px"><button class="btn primary" onclick="prototypeSave()">บันทึกรายการ</button><button class="btn gold" onclick="printDocument('payment')">พิมพ์ / ออกใบจ่ายเงิน</button></div>
+        <div class="top-actions" style="margin-top:16px"><button class="btn primary" onclick="saveDocument('payment')">บันทึกรายการ</button><button class="btn gold" onclick="printDocument('payment')">พิมพ์ / ออกใบจ่ายเงิน</button></div>
       </div>
     </section>
 
     <section id="office" class="page hidden">
-      <div class="topbar"><div><h1>ตั้งค่าสำนักงาน</h1><div class="sub">ใช้ข้อมูลนี้บนใบรับเงิน ใบจ่ายเงิน และเอกสารภาษี</div></div></div>
+      <div class="topbar"><div><h1>ตั้งค่าสำนักงาน</h1><div class="sub">กรอกครั้งเดียว ระบบจะนำโลโก้ ที่อยู่ และเลขประจำตัวไปใช้บนใบรับเงินและใบจ่ายเงินอัตโนมัติ</div></div></div>
       <div class="card">
         <div class="form-title">โลโก้และข้อมูลผู้ออกเอกสาร</div>
         <div style="display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap">
           <div class="logoPreview" id="officeLogoPreview"><span>LOGO</span></div>
-          <div style="flex:1;min-width:260px"><label>อัปโหลดโลโก้สำนักงาน<input id="officeLogoFile" type="file" accept=".png,.jpg,.jpeg,.webp" onchange="loadLogo(event)"></label><div class="hint">โลโก้จะเก็บในเบราว์เซอร์ของเครื่องนี้สำหรับต้นแบบ</div></div>
+          <div style="flex:1;min-width:260px"><label>อัปโหลดโลโก้บริษัท / สำนักงานทนายความ<input id="officeLogoFile" type="file" accept=".png,.jpg,.jpeg,.webp" onchange="loadLogo(event)"></label><div class="hint">โลโก้จะเก็บในเบราว์เซอร์ของเครื่องนี้สำหรับต้นแบบ</div></div>
         </div>
         <div class="divider"></div>
         <div class="formgrid three">
           <label>ชื่อสำนักงาน / ชื่อผู้ประกอบการ<input id="oName" placeholder="ชื่อสำนักงานทนายความ"></label>
           <label>ประเภทผู้ประกอบการ<select id="oEntity"><option>บุคคลธรรมดา</option><option>ห้างหุ้นส่วน</option><option>บริษัทจำกัด</option><option>นิติบุคคลอื่น</option></select></label>
           <label>สถานประกอบการ<select id="oBranch"><option>สำนักงานใหญ่</option><option>สาขา</option></select></label>
-          <label>เลขบัตรประชาชน / เลขทะเบียนนิติบุคคล<input id="oRegId" maxlength="13" placeholder="13 หลัก"></label>
+          <label>เลขบัตรประชาชนทนาย / เลขทะเบียนนิติบุคคลสำนักงาน<input id="oRegId" maxlength="13" placeholder="13 หลัก"></label>
           <label>เลขประจำตัวผู้เสียภาษี<input id="oTaxId" maxlength="13" placeholder="13 หลัก"></label>
           <label>เบอร์โทรศัพท์<input id="oPhone" placeholder="เบอร์โทร"></label>
           <label>อีเมล<input id="oEmail" type="email" placeholder="อีเมล"></label>
           <label>เลขที่สาขา (ถ้ามี)<input id="oBranchNo" placeholder="เช่น 00000"></label>
           <label style="display:flex;align-items:center;gap:8px;margin-top:25px"><input id="oVat" type="checkbox" style="width:auto"> จดทะเบียนภาษีมูลค่าเพิ่ม (VAT)</label>
-          <label class="span2">ที่อยู่สำนักงาน<textarea id="oAddress" placeholder="ที่อยู่สำนักงาน"></textarea></label>
+          <label class="span2">ที่อยู่บริษัท / สำนักงานทนายความ <span class="req">*</span><textarea id="oAddress" placeholder="กรอกครั้งเดียว ใช้เป็นที่อยู่ผู้ออกเอกสารทุกฉบับ"></textarea></label>
         </div>
         <div class="divider"></div>
         <div class="form-title">ข้อมูลบนเอกสาร</div>
@@ -344,7 +383,51 @@
   function checkedValues(container){return [].slice.call(document.querySelectorAll('#'+container+' input[type=checkbox]:checked')).map(function(x){return x.value})}
   function toggleOther(id,on){document.getElementById(id).classList.toggle('hidden',!on)}
   function showFileNames(inputId,targetId){var e=document.getElementById(inputId);var names=[].slice.call(e.files||[]).map(function(f){return f.name});document.getElementById(targetId).textContent=names.length?names.join(' • '):'ยังไม่ได้เลือกไฟล์'}
-  function prototypeSave(){alert('บันทึกหน้าต้นแบบแล้ว — ยังไม่ได้เชื่อมฐานข้อมูลจริง')}
+  function clearFieldError(el){if(el)el.classList.remove('error')}
+  function payerFullName(){
+    if(val('rPayerType')==='company') return val('rCompanyName');
+    return [val('rTitle'),val('rFirstName'),val('rMiddleName'),val('rLastName')].filter(Boolean).join(' ');
+  }
+  function togglePayerType(){
+    var company=val('rPayerType')==='company';
+    var wrap=document.getElementById('rCompanyWrap'); if(wrap)wrap.classList.toggle('hidden',!company);
+  }
+  function validateOther(type){
+    var isR=type==='receipt',box=isR?'receiptChecks':'paymentChecks',otherId=isR?'rOther':'pOther',errId=isR?'rOtherError':'pOtherError';
+    var items=checkedValues(box);
+    if(!items.length){alert('กรุณาเลือกรายการ'+(isR?'รับเงิน':'จ่ายเงิน')+'อย่างน้อย 1 รายการ');return false}
+    if(items.indexOf('อื่น ๆ')>-1 && !val(otherId).trim()){
+      var input=document.getElementById(otherId),err=document.getElementById(errId);
+      if(input){input.classList.add('error');input.focus()} if(err)err.classList.remove('hidden');
+      alert('เมื่อเลือก “อื่น ๆ” ต้องระบุรายละเอียดก่อนบันทึกหรือดำเนินการต่อ');
+      return false
+    }
+    var err=document.getElementById(errId);if(err)err.classList.add('hidden');clearFieldError(document.getElementById(otherId));
+    return true
+  }
+  function validateReceipt(){
+    if(!validateOther('receipt'))return false;
+    if(val('rPayerType')==='company' && !val('rCompanyName').trim()){document.getElementById('rCompanyName').focus();alert('กรุณาระบุชื่อนิติบุคคล / บริษัท');return false}
+    if(Number(val('rSubtotal')||0)<=0){document.getElementById('rSubtotal').focus();alert('กรุณาระบุยอดเงิน');return false}
+    return true
+  }
+  function validatePayment(){
+    if(!validateOther('payment'))return false;
+    if(Number(val('pAmount')||0)<=0){document.getElementById('pAmount').focus();alert('กรุณาระบุยอดเงิน');return false}
+    return true
+  }
+  function saveDocument(type){
+    if(type==='receipt'?!validateReceipt():!validatePayment())return;
+    alert('ตรวจสอบข้อมูลครบแล้ว — ต้นแบบนี้ยังไม่ได้เชื่อมฐานข้อมูลจริง')
+  }
+  function autoReceiptTax(force){
+    var mode=val('rWhtMode'),payerType=val('rPayerType');
+    if(mode==='auto'){
+      var rate=payerType==='company'?3:0;
+      var view=document.getElementById('rWhtRateView');if(view)view.textContent=rate+'%';
+    }
+    syncReceipt()
+  }
 
   var office={name:'JUSLUME LAW OFFICE',entity:'บุคคลธรรมดา',branch:'สำนักงานใหญ่',regId:'',taxId:'',phone:'',email:'',address:'',branchNo:'',vat:false,owner:'',position:'',footer:'',logo:''};
   function loadOffice(){
@@ -355,6 +438,7 @@
     applyOffice();
   }
   function saveOffice(){
+    if(!val('oAddress').trim()){document.getElementById('oAddress').focus();alert('กรุณาระบุที่อยู่บริษัท / สำนักงานทนายความ');return}
     office.name=val('oName')||'ชื่อสำนักงาน';office.entity=val('oEntity');office.branch=val('oBranch');office.regId=val('oRegId');office.taxId=val('oTaxId');office.phone=val('oPhone');office.email=val('oEmail');office.address=val('oAddress');office.branchNo=val('oBranchNo');office.owner=val('oOwner');office.position=val('oPosition');office.footer=val('oFooter');office.vat=document.getElementById('oVat').checked;
     localStorage.setItem('juslumeOfficeProfile',JSON.stringify(office));applyOffice();alert('บันทึกข้อมูลสำนักงานแล้ว')
   }
@@ -371,32 +455,40 @@
     setText('rOfficeInfo',info);setText('pOfficeInfo',info);syncReceipt();syncPayment()
   }
   function syncReceipt(){
+    togglePayerType();
     setText('rPreviewType',val('rDocType'));setText('rPreviewNo','เลขที่ '+(val('rNo')||'—'));var d=val('rDate');setText('rPreviewDate',d?d.split('-').reverse().join('/'):'—');
-    setText('rpPayer',val('rPayer'));setText('rpPayerId',val('rPayerId'));setText('rpPayerAddress',val('rPayerAddress'));setText('rpMethod',val('rMethod'));
+    setText('rpPayer',payerFullName());setText('rpPayerId',val('rPayerId'));setText('rpPayerAddress',val('rPayerAddress'));setText('rpMethod',val('rMethod'));
     setText('rpCase',(val('rCourt')||'—')+' / ดำ '+(val('rBlack')||'—')+(val('rRed')?' / แดง '+val('rRed'):''));
     setText('rpParties','โจทก์ '+(val('rPlaintiff')||'—')+' / จำเลย '+(val('rDefendant')||'—'));setText('rpSide',val('rSide'));
     var items=checkedValues('receiptChecks');if(items.indexOf('อื่น ๆ')>-1&&val('rOther'))items=items.map(function(x){return x==='อื่น ๆ'?val('rOther'):x});setText('rpItems',items.join(', '));
-    var sub=Number(val('rSubtotal')||0),base=sub,vat=0,mode=val('rVatMode');if(mode==='add'){vat=sub*.07}else if(mode==='included'){base=sub/1.07;vat=sub-base}
-    var wht=Number(val('rWht')||0),gross=mode==='add'?sub+vat:sub,net=gross-wht;setText('rpBase',money(base));setText('rpVat',money(vat));setText('rpWht',money(wht));setText('rpNet',money(net))
+    var sub=Number(val('rSubtotal')||0),base=sub,vat=0,vatMode=val('rVatMode');
+    if(vatMode==='auto')vatMode=office.vat?'add':'none';
+    if(vatMode==='add'){vat=sub*.07}else if(vatMode==='included'){base=sub/1.07;vat=sub-base}
+    var whtMode=val('rWhtMode'),whtRate=whtMode==='auto'?(val('rPayerType')==='company'?3:0):Number(whtMode||0);
+    var wht=base*whtRate/100,gross=vatMode==='add'?sub+vat:sub,net=gross-wht;
+    setText('rTaxPayerLabel',val('rPayerType')==='company'?'นิติบุคคล / บริษัท':'บุคคลธรรมดา');
+    setText('rWhtRateView',whtRate+'%');setText('rBaseView',money(base));setText('rVatView',money(vat));setText('rWhtView',money(wht));setText('rNetView',money(net));
+    setText('rpBase',money(base));setText('rpVat',money(vat));setText('rpWht',money(wht));setText('rpNet',money(net))
   }
   function syncPayment(){
     setText('ppNo','เลขที่ '+(val('pNo')||'—'));var d=val('pDate');setText('ppDate',d?d.split('-').reverse().join('/'):'—');setText('ppPayee',val('pPayee'));setText('ppPayeeId',val('pPayeeId'));setText('ppAddress',val('pAddress'));setText('ppMethod',val('pMethod'));setText('ppCase',(val('pCourt')||'—')+' / ดำ '+(val('pBlack')||'—')+(val('pRed')?' / แดง '+val('pRed'):''));
     var items=checkedValues('paymentChecks');if(items.indexOf('อื่น ๆ')>-1&&val('pOther'))items=items.map(function(x){return x==='อื่น ๆ'?val('pOther'):x});setText('ppItems',items.join(', '));
-    var a=Number(val('pAmount')||0),w=Number(val('pWht')||0),n=a-w;setText('ppAmount',money(a));setText('ppWht',money(w));setText('ppNet',money(n));document.getElementById('pNetView').value=n.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})
+    var a=Number(val('pAmount')||0),rate=Number(val('pWhtRate')||0),w=a*rate/100,n=a-w;setText('ppAmount',money(a));setText('ppWht',money(w)+' ('+rate+'%)');setText('ppNet',money(n));document.getElementById('pNetView').value=n.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2})
   }
   function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
   function printDocument(type){
+    if(type==='receipt'?!validateReceipt():!validatePayment())return;
     var isR=type==='receipt',title=isR?val('rDocType'):'ใบจ่ายเงิน',no=isR?val('rNo'):val('pNo'),date=isR?val('rDate'):val('pDate');
-    var party=isR?val('rPayer'):val('pPayee'),partyId=isR?val('rPayerId'):val('pPayeeId'),address=isR?val('rPayerAddress'):val('pAddress'),method=isR?val('rMethod'):val('pMethod'),court=isR?val('rCourt'):val('pCourt'),black=isR?val('rBlack'):val('pBlack'),red=isR?val('rRed'):val('pRed');
+    var party=isR?payerFullName():val('pPayee'),partyId=isR?val('rPayerId'):val('pPayeeId'),address=isR?val('rPayerAddress'):val('pAddress'),method=isR?val('rMethod'):val('pMethod'),court=isR?val('rCourt'):val('pCourt'),black=isR?val('rBlack'):val('pBlack'),red=isR?val('rRed'):val('pRed');
     var items=checkedValues(isR?'receiptChecks':'paymentChecks');var other=isR?val('rOther'):val('pOther');if(items.indexOf('อื่น ๆ')>-1&&other)items=items.map(function(x){return x==='อื่น ๆ'?other:x});
     var rows='';
-    if(isR){var sub=Number(val('rSubtotal')||0),base=sub,vat=0,mode=val('rVatMode');if(mode==='add')vat=sub*.07;else if(mode==='included'){base=sub/1.07;vat=sub-base}var wht=Number(val('rWht')||0),gross=mode==='add'?sub+vat:sub,net=gross-wht;rows='<tr><td>มูลค่าก่อน VAT</td><td>'+money(base)+'</td></tr><tr><td>VAT 7%</td><td>'+money(vat)+'</td></tr><tr><td>หัก ณ ที่จ่าย</td><td>'+money(wht)+'</td></tr><tr class="total"><td>รับสุทธิ</td><td>'+money(net)+'</td></tr>'}
-    else{var amt=Number(val('pAmount')||0),pw=Number(val('pWht')||0);rows='<tr><td>ยอดค่าใช้จ่าย</td><td>'+money(amt)+'</td></tr><tr><td>หัก ณ ที่จ่าย</td><td>'+money(pw)+'</td></tr><tr class="total"><td>จ่ายสุทธิ</td><td>'+money(amt-pw)+'</td></tr>'}
+    if(isR){var sub=Number(val('rSubtotal')||0),base=sub,vat=0,mode=val('rVatMode');if(mode==='auto')mode=office.vat?'add':'none';if(mode==='add')vat=sub*.07;else if(mode==='included'){base=sub/1.07;vat=sub-base}var wr=val('rWhtMode')==='auto'?(val('rPayerType')==='company'?3:0):Number(val('rWhtMode')||0),wht=base*wr/100,gross=mode==='add'?sub+vat:sub,net=gross-wht;rows='<tr><td>มูลค่าก่อน VAT</td><td>'+money(base)+'</td></tr><tr><td>VAT 7%</td><td>'+money(vat)+'</td></tr><tr><td>หัก ณ ที่จ่าย '+wr+'%</td><td>'+money(wht)+'</td></tr><tr class="total"><td>รับสุทธิ</td><td>'+money(net)+'</td></tr>'}
+    else{var amt=Number(val('pAmount')||0),pr=Number(val('pWhtRate')||0),pw=amt*pr/100;rows='<tr><td>ยอดค่าใช้จ่าย</td><td>'+money(amt)+'</td></tr><tr><td>หัก ณ ที่จ่าย '+pr+'%</td><td>'+money(pw)+'</td></tr><tr class="total"><td>จ่ายสุทธิ</td><td>'+money(amt-pw)+'</td></tr>'}
     var logo=office.logo?'<img src="'+office.logo+'" style="max-width:75px;max-height:75px">':'';
-    var html='<!doctype html><html lang="th"><head><meta charset="utf-8"><title>'+esc(title)+' '+esc(no)+'</title><style>body{font-family:Arial,"Noto Sans Thai",sans-serif;color:#222;padding:36px;max-width:850px;margin:auto}.head{display:flex;justify-content:space-between;gap:24px}.issuer{display:flex;gap:14px}.issuer h2{margin:0 0 5px}.muted{color:#666;font-size:12px;line-height:1.6}.doctype{text-align:right}.doctype h1{font-size:22px;margin:0;color:#58101f}.box{border:1px solid #ddd;border-radius:8px;padding:14px;margin-top:18px}.row{display:grid;grid-template-columns:150px 1fr;padding:7px 0;border-bottom:1px solid #eee}.row:last-child{border:0}.label{color:#666}table{width:380px;margin:18px 0 0 auto;border-collapse:collapse}td{padding:7px;border-bottom:1px solid #ddd}.total td{font-weight:bold;font-size:17px}.sign{display:flex;justify-content:space-between;margin-top:65px}.sign>div{width:220px;text-align:center;border-top:1px solid #555;padding-top:7px}@media print{body{padding:12mm}}</style></head><body><div class="head"><div class="issuer">'+logo+'<div><h2>'+esc(office.name||'ชื่อสำนักงาน')+'</h2><div class="muted">'+esc(office.address)+'<br>โทร '+esc(office.phone)+' | เลขผู้เสียภาษี '+esc(office.taxId||office.regId)+(office.branch?' | '+esc(office.branch):'')+'</div></div></div><div class="doctype"><h1>'+esc(title)+'</h1><div>เลขที่ '+esc(no)+'</div><div>วันที่ '+esc(date?date.split('-').reverse().join('/'):'-')+'</div></div></div><div class="box"><div class="row"><div class="label">'+(isR?'ผู้ชำระ / ผู้รับบริการ':'ผู้รับเงิน')+'</div><div>'+esc(party)+'</div></div><div class="row"><div class="label">เลขประจำตัว</div><div>'+esc(partyId)+'</div></div><div class="row"><div class="label">ที่อยู่</div><div>'+esc(address)+'</div></div><div class="row"><div class="label">ศาล / คดี</div><div>'+esc(court)+' | ดำ '+esc(black)+(red?' | แดง '+esc(red):'')+'</div></div><div class="row"><div class="label">รายการ</div><div>'+esc(items.join(', '))+'</div></div><div class="row"><div class="label">วิธี'+(isR?'รับ':'จ่าย')+'</div><div>'+esc(method)+'</div></div></div><table>'+rows+'</table><div class="sign"><div>'+esc(office.owner||'ผู้มีอำนาจ / ผู้อนุมัติ')+'</div><div>'+(isR?'ผู้รับเงิน':'ผู้รับเงิน')+'</div></div><script>window.onload=function(){window.print()}<\/script></body></html>';
+    var html='<!doctype html><html lang="th"><head><meta charset="utf-8"><title>'+esc(title)+' '+esc(no)+'</title><style>body{font-family:Arial,"Noto Sans Thai",sans-serif;color:#222;padding:36px;max-width:850px;margin:auto}.head{display:flex;justify-content:space-between;gap:24px}.issuer{display:flex;gap:14px}.issuer h2{margin:0 0 5px}.muted{color:#666;font-size:12px;line-height:1.6}.doctype{text-align:right}.doctype h1{font-size:22px;margin:0;color:#58101f}.box{border:1px solid #ddd;border-radius:8px;padding:14px;margin-top:18px}.row{display:grid;grid-template-columns:150px 1fr;padding:7px 0;border-bottom:1px solid #eee}.row:last-child{border:0}.label{color:#666}table{width:380px;margin:18px 0 0 auto;border-collapse:collapse}td{padding:7px;border-bottom:1px solid #ddd}.total td{font-weight:bold;font-size:17px}.sign{display:flex;justify-content:space-between;margin-top:65px}.sign>div{width:220px;text-align:center;border-top:1px solid #555;padding-top:7px}@media print{body{padding:12mm}}</style></head><body><div class="head"><div class="issuer">'+logo+'<div><h2>'+esc(office.name||'ชื่อสำนักงาน')+'</h2><div class="muted">'+esc(office.address)+'<br>โทร '+esc(office.phone)+' | เลขผู้เสียภาษี '+esc(office.taxId||office.regId)+(office.branch?' | '+esc(office.branch):'')+'</div></div></div><div class="doctype"><h1>'+esc(title)+'</h1><div>เลขที่ '+esc(no)+'</div><div>วันที่ '+esc(date?date.split('-').reverse().join('/'):'-')+'</div></div></div><div class="box"><div class="row"><div class="label">'+(isR?'ผู้ชำระ / ผู้รับบริการ':'ผู้รับเงิน')+'</div><div>'+esc(party)+'</div></div><div class="row"><div class="label">เลขประจำตัว</div><div>'+esc(partyId)+'</div></div><div class="row"><div class="label">ที่อยู่</div><div>'+esc(address)+'</div></div><div class="row"><div class="label">ศาล / คดี</div><div>'+esc(court)+' | ดำ '+esc(black)+(red?' | แดง '+esc(red):'')+'</div></div><div class="row"><div class="label">รายการ</div><div>'+esc(items.join(', '))+'</div></div><div class="row"><div class="label">วิธี'+(isR?'รับ':'จ่าย')+'</div><div>'+esc(method)+'</div></div></div><table>'+rows+'</table><div class="sign"><div>'+esc(isR?(val('rPayerSigner')||party):(val('pPayerOfficer')||office.owner||'ผู้จ่ายเงิน'))+'<br>'+(isR?'ผู้จ่ายเงิน':'ผู้จ่ายเงิน')+'</div><div>'+esc(isR?(val('rReceiver')||office.owner||'ผู้รับเงิน'):(val('pPayeeSigner')||party||'ผู้รับเงิน'))+'<br>ผู้รับเงิน</div></div><script>window.onload=function(){window.print()}<\/script></body></html>';
     var w=window.open('','_blank','width=900,height=950');w.document.write(html);w.document.close()
   }
-  loadOffice();syncReceipt();syncPayment();
+  loadOffice();togglePayerType();syncReceipt();syncPayment();
 </script>
 </body>
 </html>
