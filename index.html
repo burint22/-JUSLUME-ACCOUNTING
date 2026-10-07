@@ -69,20 +69,17 @@
         <div class="top-actions"><button class="btn" onclick="showPage('paymentForm')">+ จ่ายเงิน</button><button class="btn primary" onclick="showPage('receiptForm')">+ รับเงิน</button></div>
       </div>
       <div class="grid4">
-        <div class="card metric"><small>รายรับเดือนนี้</small><strong>฿186,500</strong><span class="positive">18 รายการ</span></div>
-        <div class="card metric"><small>รายจ่ายเดือนนี้</small><strong>฿74,820</strong><span class="negative">12 รายการ</span></div>
-        <div class="card metric"><small>เงินทดรองคดีคงเหลือ</small><strong>฿328,450</strong><span>แยกตามคดี</span></div>
-        <div class="card metric"><small>คดีที่กำลังดำเนินการ</small><strong>18</strong><span>3 คดีมีรายการรอตรวจสอบ</span></div>
+        <div class="card metric"><small>รายรับเดือนนี้</small><strong id="dashIncome">฿0.00</strong><span id="dashIncomeCount" class="positive">0 รายการ</span></div>
+        <div class="card metric"><small>รายจ่ายเดือนนี้</small><strong id="dashExpense">฿0.00</strong><span id="dashExpenseCount" class="negative">0 รายการ</span></div>
+        <div class="card metric"><small>เงินทดรองคดีคงเหลือ</small><strong id="dashCaseBalance">฿0.00</strong><span>แยกตามคดี</span></div>
+        <div class="card metric"><small>คดีที่กำลังดำเนินการ</small><strong id="dashCaseCount">0</strong><span id="dashCaseNote">0 คดี</span></div>
       </div>
       <div class="section">
         <div class="card">
           <div class="head"><h2>รายการล่าสุด</h2><button class="btn" onclick="showPage('accounting')">ดูทั้งหมด</button></div>
           <table>
             <thead><tr><th>วันที่</th><th>เอกสาร</th><th>รายการ</th><th>คดี</th><th>รับ</th><th>จ่าย</th></tr></thead>
-            <tbody>
-              <tr><td>07/10/2569</td><td>RC-2569-0018</td><td>ค่าทนายความ</td><td>พ.123/2569</td><td>35,000</td><td>—</td></tr>
-              <tr><td>06/10/2569</td><td>PV-2569-0092</td><td>ค่าธรรมเนียมศาล</td><td>พ.123/2569</td><td>—</td><td>4,500</td></tr>
-            </tbody>
+            <tbody id="latestBody"><tr><td colspan="6" class="small">ยังไม่มีข้อมูล</td></tr></tbody>
           </table>
         </div>
         <div class="card">
@@ -134,10 +131,7 @@
 
     <section id="accounting" class="page hidden">
       <div class="topbar"><div><h1>รายรับ–รายจ่าย</h1><div class="sub">เลือกรายการรับ–จ่ายด้วยช่องติ๊ก และผูกกับคดีได้</div></div><div class="top-actions"><button class="btn" onclick="showPage('paymentForm')">+ รายจ่าย</button><button class="btn primary" onclick="showPage('receiptForm')">+ รายรับ</button></div></div>
-      <div class="card"><table><thead><tr><th>วันที่</th><th>เอกสาร</th><th>ประเภท</th><th>รายการ</th><th>ศาล/คดี</th><th>จำนวน</th></tr></thead><tbody>
-        <tr><td>07/10/2569</td><td>RC-2569-0018</td><td><span class="tag">รับ</span></td><td>ค่าทนายความ</td><td>ศาลจังหวัดนครราชสีมา / พ.123/2569</td><td>35,000</td></tr>
-        <tr><td>06/10/2569</td><td>PV-2569-0092</td><td>จ่าย</td><td>ค่าธรรมเนียมศาล</td><td>ศาลจังหวัดนครราชสีมา / พ.123/2569</td><td>4,500</td></tr>
-      </tbody></table></div>
+      <div class="card"><table><thead><tr><th>วันที่</th><th>เอกสาร</th><th>ประเภท</th><th>รายการ</th><th>คดี</th><th>จำนวน</th></tr></thead><tbody id="accountingBody"><tr><td colspan="6" class="small">ยังไม่มีข้อมูล</td></tr></tbody></table></div>
     </section>
 
     <section id="receiptForm" class="page hidden">
@@ -147,7 +141,7 @@
         <div class="form-title">ข้อมูลเอกสารและคดี</div>
         <div class="formgrid three">
           <label>ชนิดเอกสาร<select id="rDocType" onchange="syncReceipt()"><option>ใบรับเงิน</option><option>ใบเสร็จรับเงิน</option><option>ใบเสร็จรับเงิน / ใบกำกับภาษี</option></select></label>
-          <label>เลขที่เอกสาร<input id="rNo" value="RC-2569-0019" oninput="syncReceipt()"></label>
+          <label>เลขที่เอกสาร<input id="rNo" placeholder="ระบบจะใช้เลขที่ที่กรอก" oninput="syncReceipt()"></label>
           <label>วันที่<input id="rDate" type="date" value="2026-10-07" onchange="syncReceipt()"></label>
           <label>ศาล<input id="rCourt" placeholder="ชื่อศาล" oninput="syncReceipt()"></label>
           <label>เลขคดีดำ<input id="rBlack" placeholder="พ.123/2569" oninput="syncReceipt()"></label>
@@ -230,7 +224,7 @@
         <div class="preview" id="receiptPreview">
           <div class="dochead">
             <div class="docbrand"><div class="doclogo" id="rLogo"><span>LOGO</span></div><div><div class="docname" id="rOfficeName">ชื่อสำนักงาน</div><div class="small" id="rOfficeInfo">ที่อยู่ • โทร • เลขประจำตัว</div></div></div>
-            <div class="doctype"><b id="rPreviewType">ใบรับเงิน</b><div class="small" id="rPreviewNo">เลขที่ RC-2569-0019</div><div class="small" id="rPreviewDate">07/10/2026</div></div>
+            <div class="doctype"><b id="rPreviewType">ใบรับเงิน</b><div class="small" id="rPreviewNo">เลขที่ —</div><div class="small" id="rPreviewDate">07/10/2026</div></div>
           </div>
           <div class="docgrid">
             <div><b>ผู้ชำระ / ผู้รับบริการ</b><br><span id="rpPayer">—</span></div>
@@ -253,7 +247,7 @@
       <div class="card">
         <div class="form-title">ข้อมูลเอกสารและคดี</div>
         <div class="formgrid three">
-          <label>เลขที่ใบจ่ายเงิน<input id="pNo" value="PV-2569-0093" oninput="syncPayment()"></label>
+          <label>เลขที่ใบจ่ายเงิน<input id="pNo" placeholder="ระบบจะใช้เลขที่ที่กรอก" oninput="syncPayment()"></label>
           <label>วันที่จ่าย<input id="pDate" type="date" value="2026-10-07" onchange="syncPayment()"></label>
           <label>วิธีจ่าย<select id="pMethod" onchange="syncPayment()"><option>โอนเงิน</option><option>เงินสด</option><option>เช็ค</option><option>บัตร / QR</option><option>อื่น ๆ</option></select></label>
           <label>ศาล<input id="pCourt" placeholder="ชื่อศาล" oninput="syncPayment()"></label>
@@ -303,7 +297,7 @@
         <div class="preview">
           <div class="dochead">
             <div class="docbrand"><div class="doclogo" id="pLogo"><span>LOGO</span></div><div><div class="docname" id="pOfficeName">ชื่อสำนักงาน</div><div class="small" id="pOfficeInfo">ที่อยู่ • โทร • เลขประจำตัว</div></div></div>
-            <div class="doctype"><b>ใบจ่ายเงิน</b><div class="small" id="ppNo">เลขที่ PV-2569-0093</div><div class="small" id="ppDate">07/10/2026</div></div>
+            <div class="doctype"><b>ใบจ่ายเงิน</b><div class="small" id="ppNo">เลขที่ —</div><div class="small" id="ppDate">07/10/2026</div></div>
           </div>
           <div class="docgrid">
             <div><b>ผู้รับเงิน</b><br><span id="ppPayee">—</span></div>
@@ -526,32 +520,51 @@
     var w=window.open('','_blank','width=900,height=950');w.document.write(html);w.document.close()
   }
 
-  var defaultData={
-    cases:[
-      {id:'c_demo1',court:'ศาลจังหวัดนครราชสีมา',black:'พ.123/2569',red:'—',plaintiff:'บริษัท ตัวอย่าง จำกัด',defendant:'นาย ก.',side:'โจทก์',status:'อยู่ระหว่างพิจารณา'},
-      {id:'c_demo2',court:'ศาลแขวงนครราชสีมา',black:'ผบ.88/2569',red:'ผบ.165/2569',plaintiff:'นาง ข.',defendant:'บริษัท ค. จำกัด',side:'จำเลย',status:'มีคำพิพากษา'}
-    ],
-    receipts:[{id:'r_demo1',no:'RC-2569-0018',date:'2026-10-07',payer:'บริษัท ตัวอย่าง จำกัด',items:'ค่าทนายความ',caseNo:'พ.123/2569',amount:35000}],
-    payments:[{id:'p_demo1',no:'PV-2569-0092',date:'2026-10-06',payer:'สำนักงานศาล',items:'ค่าธรรมเนียมศาล',caseNo:'พ.123/2569',amount:4500}]
-  };
+  var defaultData={cases:[],receipts:[],payments:[]};
   var appData={cases:[],receipts:[],payments:[]};
   function loadAppData(){
-    try{var s=localStorage.getItem('juslumeAppData');appData=s?JSON.parse(s):JSON.parse(JSON.stringify(defaultData))}
+    try{var s=localStorage.getItem('juslumeAppDataV2');appData=s?JSON.parse(s):JSON.parse(JSON.stringify(defaultData))}
     catch(e){appData=JSON.parse(JSON.stringify(defaultData))}
     if(!appData.cases)appData.cases=[];if(!appData.receipts)appData.receipts=[];if(!appData.payments)appData.payments=[];
   }
-  function saveAppData(){localStorage.setItem('juslumeAppData',JSON.stringify(appData))}
+  function saveAppData(){localStorage.setItem('juslumeAppDataV2',JSON.stringify(appData))}
   function dmy(d){return d?d.split('-').reverse().join('/'):'—'}
   function renderData(){
-    var cb=document.getElementById('casesBody');if(cb)cb.innerHTML=appData.cases.map(function(x){
+    var cb=document.getElementById('casesBody');
+    if(cb)cb.innerHTML=appData.cases.length?appData.cases.map(function(x){
       return '<tr><td>'+esc(x.court)+'</td><td>'+esc(x.black||'—')+'</td><td>'+esc(x.red||'—')+'</td><td>'+esc(x.plaintiff)+'</td><td>'+esc(x.defendant)+'</td><td><span class="tag">'+esc(x.side)+'</span></td><td>'+esc(x.status)+'</td><td><button class="iconBtn danger" onclick="requestDelete(\'cases\',\''+x.id+'\',\'คดี '+esc(x.black||x.red||'')+'\')">ลบ</button></td></tr>'
-    }).join('');
-    var rb=document.getElementById('receiptsBody');if(rb)rb.innerHTML=appData.receipts.map(function(x){
-      return '<tr><td>'+esc(x.no)+'</td><td>'+esc(dmy(x.date))+'</td><td>'+esc(x.payer)+'</td><td>'+esc(x.items)+'</td><td>'+esc(x.caseNo)+'</td><td>'+money(x.amount)+'</td><td><button class="iconBtn danger" onclick="requestDelete(\'receipts\',\''+x.id+'\',\'ใบรับเงิน '+esc(x.no)+'\')">ลบ</button></td></tr>'
-    }).join('');
-    var pb=document.getElementById('paymentsBody');if(pb)pb.innerHTML=appData.payments.map(function(x){
-      return '<tr><td>'+esc(x.no)+'</td><td>'+esc(dmy(x.date))+'</td><td>'+esc(x.payer)+'</td><td>'+esc(x.items)+'</td><td>'+esc(x.caseNo)+'</td><td>'+money(x.amount)+'</td><td><button class="iconBtn danger" onclick="requestDelete(\'payments\',\''+x.id+'\',\'ใบจ่ายเงิน '+esc(x.no)+'\')">ลบ</button></td></tr>'
-    }).join('');
+    }).join(''):'<tr><td colspan="8" class="small">ยังไม่มีข้อมูลคดี</td></tr>';
+
+    var rb=document.getElementById('receiptsBody');
+    if(rb)rb.innerHTML=appData.receipts.length?appData.receipts.map(function(x){
+      return '<tr><td>'+esc(x.no||'—')+'</td><td>'+esc(dmy(x.date))+'</td><td>'+esc(x.payer||'—')+'</td><td>'+esc(x.items||'—')+'</td><td>'+esc(x.caseNo||'—')+'</td><td>'+money(x.amount)+'</td><td><button class="iconBtn danger" onclick="requestDelete(\'receipts\',\''+x.id+'\',\'ใบรับเงิน '+esc(x.no||'')+'\')">ลบ</button></td></tr>'
+    }).join(''):'<tr><td colspan="7" class="small">ยังไม่มีใบรับเงิน</td></tr>';
+
+    var pb=document.getElementById('paymentsBody');
+    if(pb)pb.innerHTML=appData.payments.length?appData.payments.map(function(x){
+      return '<tr><td>'+esc(x.no||'—')+'</td><td>'+esc(dmy(x.date))+'</td><td>'+esc(x.payer||'—')+'</td><td>'+esc(x.items||'—')+'</td><td>'+esc(x.caseNo||'—')+'</td><td>'+money(x.amount)+'</td><td><button class="iconBtn danger" onclick="requestDelete(\'payments\',\''+x.id+'\',\'ใบจ่ายเงิน '+esc(x.no||'')+'\')">ลบ</button></td></tr>'
+    }).join(''):'<tr><td colspan="7" class="small">ยังไม่มีใบจ่ายเงิน</td></tr>';
+
+    var income=appData.receipts.reduce(function(s,x){return s+Number(x.amount||0)},0);
+    var expense=appData.payments.reduce(function(s,x){return s+Number(x.amount||0)},0);
+    setText('dashIncome',money(income));setText('dashIncomeCount',appData.receipts.length+' รายการ');
+    setText('dashExpense',money(expense));setText('dashExpenseCount',appData.payments.length+' รายการ');
+    setText('dashCaseBalance',money(Math.max(0,income-expense)));setText('dashCaseCount',String(appData.cases.length));setText('dashCaseNote',appData.cases.length+' คดี');
+
+    var tx=[];
+    appData.receipts.forEach(function(x){tx.push({type:'รับ',date:x.date,no:x.no,items:x.items,caseNo:x.caseNo,amount:x.amount})});
+    appData.payments.forEach(function(x){tx.push({type:'จ่าย',date:x.date,no:x.no,items:x.items,caseNo:x.caseNo,amount:x.amount})});
+    tx.sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))});
+
+    var latest=document.getElementById('latestBody');
+    if(latest)latest.innerHTML=tx.length?tx.slice(0,5).map(function(x){
+      return '<tr><td>'+esc(dmy(x.date))+'</td><td>'+esc(x.no||'—')+'</td><td>'+esc(x.items||'—')+'</td><td>'+esc(x.caseNo||'—')+'</td><td>'+(x.type==='รับ'?money(x.amount):'—')+'</td><td>'+(x.type==='จ่าย'?money(x.amount):'—')+'</td></tr>'
+    }).join(''):'<tr><td colspan="6" class="small">ยังไม่มีข้อมูล</td></tr>';
+
+    var ab=document.getElementById('accountingBody');
+    if(ab)ab.innerHTML=tx.length?tx.map(function(x){
+      return '<tr><td>'+esc(dmy(x.date))+'</td><td>'+esc(x.no||'—')+'</td><td>'+(x.type==='รับ'?'<span class="tag">รับ</span>':'จ่าย')+'</td><td>'+esc(x.items||'—')+'</td><td>'+esc(x.caseNo||'—')+'</td><td>'+money(x.amount)+'</td></tr>'
+    }).join(''):'<tr><td colspan="6" class="small">ยังไม่มีข้อมูล</td></tr>';
   }
   function saveCaseRecord(){
     var court=val('cCourt'),black=val('cBlack'),red=val('cRed'),plaintiff=val('cPlaintiff'),defendant=val('cDefendant');
