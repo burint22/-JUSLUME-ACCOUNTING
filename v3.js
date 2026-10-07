@@ -19,7 +19,7 @@ function cases(){return (window.appData&&appData.cases||[]).map(function(x){retu
 function caseLabel(i){var x=cases().find(function(c){return c.id===i});return x?x.label:'ไม่ผูกคดี'}
 function caseOpts(){return '<option value="">ไม่ผูกคดี</option>'+cases().map(function(c){return '<option value="'+e(c.id)+'">'+e(c.label)+'</option>'}).join('')}
 function closed(d){return db.periods.find(function(p){return p.status==='closed'&&d>=p.from&&d<=p.to})}
-function openDate(d){var p=closed(d);if(p){alert('งวดบัญชี '+p.label+' ปิดแล้ว');return false}return true}
+function openDate(d){if(window.office&&office.supabaseUrl&&office.supabaseAnon&&window.JuslumeCloud){var role=JuslumeCloud.getRole();if(role==='viewer'){alert('บัญชีนี้เป็น Viewer ดูข้อมูลได้อย่างเดียว');return false}if(role==='offline'){alert('กรุณาเข้าสู่ Cloud ก่อนบันทึกรายการ');return false}}var p=closed(d);if(p){alert('งวดบัญชี '+p.label+' ปิดแล้ว');return false}return true}
 function no(prefix,arr){var y=new Date().getFullYear()+543;var c=arr.filter(function(x){return String(x.no||'').indexOf(prefix+'-'+y+'-')===0}).length+1;return prefix+'-'+y+'-'+String(c).padStart(6,'0')}
 function jv(date,memo,source,lines){
  if(!openDate(date))return;
