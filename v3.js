@@ -40,17 +40,48 @@ function style(){
  var s=document.createElement('style');s.textContent='.v3g{margin:13px 12px 5px;font-size:11px;opacity:.55}.v3stat{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}.v3stat .card strong{display:block;font-size:20px;margin-top:6px}.v3table{overflow:auto}.v3table table{min-width:760px}.pill{display:inline-block;padding:4px 8px;border-radius:99px;background:#f1e6e8;font-size:11px}.pill.ok{background:#e8f5ee;color:#176b4b}.pill.warn{background:#fff3cd}.v3form{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.v3wide{grid-column:1/-1}@media(max-width:800px){.v3stat,.v3form{grid-template-columns:1fr 1fr}}@media(max-width:560px){.v3stat,.v3form{grid-template-columns:1fr}}';
  document.head.appendChild(s)
 }
+function openLegacyPage(page){
+ document.querySelectorAll('.page').forEach(function(p){p.classList.add('hidden')});
+ var el=document.getElementById(page);
+ if(!el){alert('ไม่พบหน้าระบบ: '+page);return}
+ el.classList.remove('hidden');
+ document.querySelectorAll('aside nav button').forEach(function(x){x.classList.remove('active')});
+ var btn=document.querySelector('aside nav button[data-page="'+page+'"]');
+ if(btn)btn.classList.add('active');
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+window.openLegacyPage=openLegacyPage;
 function nav(){
  var x=document.querySelector('aside nav');if(!x)return;
- x.innerHTML='<button class="active" data-page="dashboard">ภาพรวม</button><div class="v3g">งานคดี</div><button data-page="cases">รายละเอียดคดี</button><button data-v3="funds">เงินในคดี</button><div class="v3g">การเงิน</div><button data-page="receipts">ใบรับเงิน</button><button data-page="payments">ใบจ่ายเงิน</button><button data-v3="ar">ลูกหนี้ / ใบแจ้งหนี้</button><button data-v3="ap">เจ้าหนี้ / ใบตั้งหนี้</button><button data-v3="banks">เงินสดและธนาคาร</button><div class="v3g">บัญชี</div><button data-page="accounting">บัญชีรับ - จ่าย</button><button data-v3="journal">สมุดรายวัน</button><button data-v3="trial">งบทดลอง</button><button data-v3="periods">ปิดงวดบัญชี</button><div class="v3g">ภาษี</div><button data-v3="tax">VAT / WHT / 50 ทวิ</button><div class="v3g">ควบคุม</div><button data-v3="reports">รายงานบริหาร</button><button data-v3="audit">Audit Log</button><button data-page="office">ตั้งค่าสำนักงาน</button>';
- document.querySelectorAll('[data-v3]').forEach(function(b){b.onclick=function(){show(this.dataset.v3)}});
+ x.innerHTML=
+ '<button class="active" data-page="dashboard">ภาพรวม</button>'+
+ '<div class="v3g">งานคดี</div>'+
+ '<button data-page="cases">รายละเอียดคดี</button>'+
+ '<button data-v3="funds">เงินในคดี</button>'+
+ '<div class="v3g">การเงิน</div>'+
+ '<button data-page="receiptForm">ออกใบรับเงิน</button>'+
+ '<button data-page="paymentForm">ออกใบสั่งจ่าย</button>'+
+ '<button data-page="receipts">ทะเบียนใบรับเงิน</button>'+
+ '<button data-page="payments">ทะเบียนใบจ่ายเงิน</button>'+
+ '<button data-v3="ar">ลูกหนี้ / ใบแจ้งหนี้</button>'+
+ '<button data-v3="ap">เจ้าหนี้ / ใบตั้งหนี้</button>'+
+ '<button data-v3="banks">เงินสดและธนาคาร</button>'+
+ '<div class="v3g">บัญชี</div>'+
+ '<button data-page="accounting">บัญชีรับ - จ่าย</button>'+
+ '<button data-v3="journal">สมุดรายวัน</button>'+
+ '<button data-v3="trial">งบทดลอง</button>'+
+ '<button data-v3="periods">ปิดงวดบัญชี</button>'+
+ '<div class="v3g">ภาษี</div>'+
+ '<button data-v3="tax">VAT / WHT / 50 ทวิ</button>'+
+ '<div class="v3g">ควบคุม</div>'+
+ '<button data-v3="reports">รายงานบริหาร</button>'+
+ '<button data-v3="audit">Audit Log</button>'+
+ '<button data-page="office">ตั้งค่าสำนักงาน</button>';
+ document.querySelectorAll('[data-v3]').forEach(function(b){
+   b.onclick=function(){show(this.dataset.v3)};
+ });
  document.querySelectorAll('aside nav [data-page]').forEach(function(b){
-   b.onclick=function(){
-     var page=this.dataset.page;
-     if(typeof window.showPage==='function')window.showPage(page);
-     document.querySelectorAll('aside nav button').forEach(function(x){x.classList.remove('active')});
-     this.classList.add('active');
-   };
+   b.onclick=function(){openLegacyPage(this.dataset.page)};
  });
 }
 function renderFunds(){
