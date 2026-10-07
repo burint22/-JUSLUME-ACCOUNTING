@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#3a0812" />
+  <title>JUSLUME ACCOUNTING</title>
+  <style>
+    :root{
+      --wine:#3a0812; --wine2:#58101f; --gold:#c7a45a; --bg:#f6f3f1;
+      --card:#ffffff; --ink:#201a1b; --muted:#756c6f; --line:#eadfe1;
+      --ok:#176b4b; --warn:#9a6410; --danger:#9f2f3d;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,"Noto Sans Thai",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink)}
+    button,input,select{font:inherit}
+    .app{min-height:100vh;display:grid;grid-template-columns:250px 1fr}
+    aside{background:linear-gradient(180deg,var(--wine),#26050c);color:#fff;padding:24px 18px;position:sticky;top:0;height:100vh}
+    .brand{display:flex;gap:12px;align-items:center;margin-bottom:28px}
+    .logo{width:38px;height:38px;border:1px solid rgba(255,255,255,.28);border-radius:11px;display:grid;place-items:center;color:var(--gold);font-weight:800}
+    .brand b{display:block;letter-spacing:.06em}.brand small{opacity:.68}
+    nav{display:grid;gap:7px}
+    nav button{border:0;background:transparent;color:#f7ecee;text-align:left;padding:11px 12px;border-radius:10px;cursor:pointer}
+    nav button:hover,nav button.active{background:rgba(255,255,255,.11)}
+    .side-note{position:absolute;bottom:22px;left:18px;right:18px;color:#d9c7cb;font-size:12px;line-height:1.6}
+    main{padding:28px}
+    .topbar{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:24px}
+    h1{font-size:26px;margin:0}.sub{color:var(--muted);margin-top:4px;font-size:14px}
+    .top-actions{display:flex;gap:10px}
+    .btn{border:1px solid var(--line);background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .btn.primary{background:var(--wine2);border-color:var(--wine2);color:#fff}
+    .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 6px 24px rgba(43,17,25,.04)}
+    .metric small{color:var(--muted)}.metric strong{display:block;font-size:25px;margin:10px 0 3px}
+    .metric span{font-size:12px}.positive{color:var(--ok)}.negative{color:var(--danger)}
+    .section{display:grid;grid-template-columns:1.4fr .8fr;gap:14px;margin-top:14px}
+    .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .head h2{font-size:17px;margin:0}
+    table{width:100%;border-collapse:collapse;font-size:14px}
+    th,td{padding:12px 10px;border-bottom:1px solid var(--line);text-align:left}
+    th{color:var(--muted);font-weight:600;font-size:12px}
+    .tag{display:inline-block;padding:5px 8px;border-radius:999px;background:#f1e6e8;color:var(--wine2);font-size:12px}
+    .progress{height:8px;background:#eee7e8;border-radius:999px;overflow:hidden}.progress i{display:block;height:100%;background:var(--gold)}
+    .case-row{padding:12px 0;border-bottom:1px solid var(--line)}.case-row:last-child{border-bottom:0}
+    .case-row b{display:block;margin-bottom:5px}.case-row small{color:var(--muted)}
+    .hidden{display:none}
+    .formgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    label{display:grid;gap:6px;font-size:13px;color:var(--muted)}
+    input,select{padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+    .mobilebar{display:none}
+    @media(max-width:900px){
+      .app{grid-template-columns:1fr}aside{display:none}main{padding:18px 14px 76px}
+      .grid4{grid-template-columns:1fr 1fr}.section{grid-template-columns:1fr}
+      .mobilebar{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);z-index:5}
+      .mobilebar button{border:0;background:#fff;padding:12px 4px;font-size:12px}
+    }
+    @media(max-width:560px){
+      .grid4{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.formgrid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <div class="brand"><div class="logo">JL</div><div><b>JUSLUME</b><small>Accounting for Law Office</small></div></div>
+    <nav>
+      <button class="active" data-page="dashboard">ภาพรวม</button>
+      <button data-page="cases">คดีและลูกความ</button>
+      <button data-page="money">เงินในคดี</button>
+      <button data-page="accounting">รายรับ–รายจ่าย</button>
+      <button data-page="billing">ใบแจ้งหนี้ / ใบเสร็จ</button>
+      <button data-page="reports">รายงานบัญชี</button>
+    </nav>
+    <div class="side-note">Prototype สำหรับออกแบบระบบเท่านั้น<br>ยังไม่เชื่อมฐานข้อมูลจริง</div>
+  </aside>
+
+  <main>
+    <section id="dashboard" class="page">
+      <div class="topbar">
+        <div><h1>ภาพรวมสำนักงาน</h1><div class="sub">ระบบบริหารคดี การเงิน และบัญชีสำหรับสำนักงานทนายความ</div></div>
+        <div class="top-actions"><button class="btn">นำเข้าข้อมูล</button><button class="btn primary" onclick="openEntry()">+ บันทึกรายการ</button></div>
+      </div>
+
+      <div class="grid4">
+        <div class="card metric"><small>รายรับเดือนนี้</small><strong>฿186,500</strong><span class="positive">▲ 12.4% จากเดือนก่อน</span></div>
+        <div class="card metric"><small>ค่าใช้จ่ายเดือนนี้</small><strong>฿74,820</strong><span class="negative">▲ 5.1% จากเดือนก่อน</span></div>
+        <div class="card metric"><small>ลูกหนี้ค่าบริการ</small><strong>฿92,000</strong><span>5 ใบแจ้งหนี้</span></div>
+        <div class="card metric"><small>เงินในคดีคงเหลือ</small><strong>฿328,450</strong><span class="positive">แยกจากเงินสำนักงาน</span></div>
+      </div>
+
+      <div class="section">
+        <div class="card">
+          <div class="head"><h2>รายการล่าสุด</h2><span class="tag">ตัวอย่างข้อมูล</span></div>
+          <table>
+            <thead><tr><th>วันที่</th><th>รายการ</th><th>คดี</th><th>ประเภท</th><th>จำนวน</th></tr></thead>
+            <tbody>
+              <tr><td>07/10/2569</td><td>รับค่าทนายงวดที่ 2</td><td>ลค. 069-014</td><td><span class="tag">รายรับ</span></td><td>฿35,000</td></tr>
+              <tr><td>06/10/2569</td><td>ค่าธรรมเนียมศาล</td><td>ลค. 069-011</td><td>เงินในคดี</td><td>฿4,500</td></tr>
+              <tr><td>05/10/2569</td><td>ค่าถ่ายเอกสาร</td><td>—</td><td>ค่าใช้จ่าย</td><td>฿1,280</td></tr>
+              <tr><td>04/10/2569</td><td>รับเงินทดรองคดี</td><td>ลค. 069-016</td><td>เงินในคดี</td><td>฿20,000</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="head"><h2>สถานะงานคดี</h2><span>18 คดี</span></div>
+          <div class="case-row"><b>คดีอยู่ระหว่างดำเนินการ</b><small>12 คดี</small><div class="progress"><i style="width:67%"></i></div></div>
+          <div class="case-row"><b>รอเอกสาร / รอลูกความ</b><small>4 คดี</small><div class="progress"><i style="width:22%"></i></div></div>
+          <div class="case-row"><b>ใกล้ปิดคดี</b><small>2 คดี</small><div class="progress"><i style="width:11%"></i></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="cases" class="page hidden">
+      <div class="topbar"><div><h1>คดีและลูกความ</h1><div class="sub">เชื่อมลูกความ คดี นัดหมาย และรายการทางการเงินไว้ในแฟ้มเดียว</div></div><button class="btn primary">+ เพิ่มคดี</button></div>
+      <div class="card"><table><thead><tr><th>รหัสคดี</th><th>ลูกความ</th><th>ประเภทคดี</th><th>สถานะ</th><th>ยอดค้าง</th></tr></thead><tbody>
+        <tr><td>069-014</td><td>บริษัท ตัวอย่าง จำกัด</td><td>แพ่ง</td><td><span class="tag">ดำเนินการ</span></td><td>฿15,000</td></tr>
+        <tr><td>069-016</td><td>นาย ก.</td><td>บังคับคดี</td><td><span class="tag">ดำเนินการ</span></td><td>฿0</td></tr>
+        <tr><td>069-011</td><td>นาง ข.</td><td>ครอบครัว</td><td>รอเอกสาร</td><td>฿8,500</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="money" class="page hidden">
+      <div class="topbar"><div><h1>เงินในคดี</h1><div class="sub">ติดตามเงินรับแทนลูกความ เงินทดรอง และค่าใช้จ่ายรายคดี</div></div><button class="btn primary">+ รับ / จ่ายเงินในคดี</button></div>
+      <div class="grid4">
+        <div class="card metric"><small>ยอดเงินในคดีรวม</small><strong>฿328,450</strong></div>
+        <div class="card metric"><small>รอเบิกจ่าย</small><strong>฿46,200</strong></div>
+        <div class="card metric"><small>รอคืนลูกความ</small><strong>฿18,750</strong></div>
+        <div class="card metric"><small>รายการรอตรวจสอบ</small><strong>3</strong></div>
+      </div>
+    </section>
+
+    <section id="accounting" class="page hidden">
+      <div class="topbar"><div><h1>รายรับ–รายจ่าย</h1><div class="sub">บันทึกค่าใช้จ่าย ค่าบริการ และรายการบัญชีสำนักงาน</div></div><button class="btn primary" onclick="openEntry()">+ รายการใหม่</button></div>
+      <div class="card"><table><thead><tr><th>วันที่</th><th>เลขที่เอกสาร</th><th>บัญชี</th><th>เดบิต</th><th>เครดิต</th></tr></thead><tbody>
+        <tr><td>07/10/2569</td><td>RV-00018</td><td>เงินฝากธนาคาร / รายได้ค่าบริการ</td><td>35,000</td><td>35,000</td></tr>
+        <tr><td>05/10/2569</td><td>PV-00009</td><td>ค่าใช้จ่ายสำนักงาน / เงินสด</td><td>1,280</td><td>1,280</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="billing" class="page hidden">
+      <div class="topbar"><div><h1>ใบแจ้งหนี้ / ใบเสร็จ</h1><div class="sub">จัดการค่าบริการและสถานะการรับชำระ</div></div><button class="btn primary">+ สร้างใบแจ้งหนี้</button></div>
+      <div class="card"><table><thead><tr><th>เลขที่</th><th>ลูกความ</th><th>ครบกำหนด</th><th>ยอดสุทธิ</th><th>สถานะ</th></tr></thead><tbody>
+        <tr><td>INV-2569-021</td><td>บริษัท ตัวอย่าง จำกัด</td><td>15/10/2569</td><td>฿15,000</td><td><span class="tag">รอชำระ</span></td></tr>
+        <tr><td>INV-2569-020</td><td>นาย ก.</td><td>10/10/2569</td><td>฿22,000</td><td>ชำระแล้ว</td></tr>
+      </tbody></table></div>
+    </section>
+
+    <section id="reports" class="page hidden">
+      <div class="topbar"><div><h1>รายงานบัญชี</h1><div class="sub">รายงานสำหรับติดตามผลประกอบการและตรวจสอบบัญชี</div></div></div>
+      <div class="grid4">
+        <div class="card"><b>งบกำไรขาดทุน</b><p class="sub">รายได้และค่าใช้จ่ายตามช่วงเวลา</p></div>
+        <div class="card"><b>งบแสดงฐานะการเงิน</b><p class="sub">สินทรัพย์ หนี้สิน และส่วนของเจ้าของ</p></div>
+        <div class="card"><b>รายงานลูกหนี้</b><p class="sub">ยอดค้างและอายุลูกหนี้</p></div>
+        <div class="card"><b>รายงานเงินในคดี</b><p class="sub">แยกยอดคงเหลือตามลูกความและคดี</p></div>
+      </div>
+    </section>
+
+    <section id="entry" class="page hidden">
+      <div class="topbar"><div><h1>บันทึกรายการใหม่</h1><div class="sub">ตัวอย่างแบบฟอร์มสำหรับต้นแบบ</div></div><button class="btn" onclick="showPage('dashboard')">← กลับ</button></div>
+      <div class="card">
+        <div class="formgrid">
+          <label>วันที่<input type="date" value="2026-10-07"></label>
+          <label>ประเภท<select><option>รายรับ</option><option>ค่าใช้จ่าย</option><option>เงินในคดี</option></select></label>
+          <label>คดี / ลูกความ<input placeholder="ค้นหารหัสคดีหรือลูกความ"></label>
+          <label>จำนวนเงิน<input type="number" placeholder="0.00"></label>
+          <label style="grid-column:1/-1">รายละเอียด<input placeholder="รายละเอียดรายการ"></label>
+        </div>
+        <div style="margin-top:16px"><button class="btn primary" onclick="alert('ต้นแบบ: ยังไม่บันทึกลงฐานข้อมูลจริง')">บันทึกรายการ</button></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="mobilebar">
+  <button onclick="showPage('dashboard')">ภาพรวม</button>
+  <button onclick="showPage('cases')">คดี</button>
+  <button onclick="showPage('money')">เงินในคดี</button>
+  <button onclick="showPage('accounting')">บัญชี</button>
+</div>
+
+<script>
+  const buttons=[...document.querySelectorAll('nav button')];
+  buttons.forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+  function showPage(id){
+    document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+    const el=document.getElementById(id); if(el) el.classList.remove('hidden');
+    buttons.forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  function openEntry(){showPage('entry')}
+</script>
+</body>
+</html>
